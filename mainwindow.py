@@ -1,9 +1,10 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkinter import filedialog
 from PIL import Image, ImageTk
 
 #枠のサイズを画像より少し大きくする
-add_frame_size = 2
+ADD_FRAME_SIZE = 1
 
 class Application(tk.Frame):
     CANVAS_WIDTH = 1280
@@ -21,6 +22,8 @@ class Application(tk.Frame):
         self.init_various()
         #枠を初期化
         self.init_rectangle()
+        #メニューの初期化
+        self.init_menu()
         
     def init_rectangle(self):
         self.rect_start_x = None
@@ -31,13 +34,7 @@ class Application(tk.Frame):
         #キャンバス作って
         self.canvas = tk.Canvas(self, width=self.CANVAS_WIDTH,height=self.CANVAS_WIDTH, bg='white')
         self.canvas.pack()
-        #画像読み込み
-        img = Image.open('clockkari2.png')
-        #このImageTk?は保持しておかないといけないらしい
-        self.tkimg = ImageTk.PhotoImage(img)
-        self.canvas.create_image(200, 200, image=self.tkimg, tags="img")
-        #画像のサイズを取得
-        self.sprite_size = img.size
+      
 
     #画像がクリックされたときの処理
     def pressed(self,event):
@@ -68,10 +65,10 @@ class Application(tk.Frame):
             #左上のx座標、左上のy座標
             #右下のx座標、右下のy座標
             self.rect = self.canvas.create_rectangle(
-            sprite_position_x - sprite_size_x / 2 + add_frame_size,
-            sprite_position_y + sprite_size_y / 2 + add_frame_size,
-            sprite_position_x + sprite_size_x / 2 + add_frame_size,
-            sprite_position_y - sprite_size_y / 2 + add_frame_size,
+            sprite_position_x - sprite_size_x / 2 - ADD_FRAME_SIZE,
+            sprite_position_y + sprite_size_y / 2 + ADD_FRAME_SIZE,
+            sprite_position_x + sprite_size_x / 2 + ADD_FRAME_SIZE,
+            sprite_position_y - sprite_size_y / 2 - ADD_FRAME_SIZE,
             outline='red')
 
     
@@ -104,14 +101,39 @@ class Application(tk.Frame):
         self.pressed_x = event.x
         self.pressed_y = event.y
 
+    #ファイル読み込みが選択されたときの処理
+    def load_sprite(self):
+        #読み込むファイルの拡張子を指定
+        typ = [('png画像','*.png'),
+        ('jpg画像','*.jpg')]
+        #ファイル選択ダイアログを表示
+        self.fn = filedialog.askopenfilename(filetypes=typ)
+         #画像読み込み
+        img = Image.open(self.fn)
+        #このImageTk?は保持しておかないといけないらしい
+        self.tkimg = ImageTk.PhotoImage(img)
+        self.canvas.create_image(200, 200, image=self.tkimg, tags='img')
+        #画像のサイズを取得
+        self.sprite_size = img.size
+        #関数をバインドする
+        self.canvas.tag_bind('img', '<ButtonPress-1>', self.pressed)
+        self.canvas.tag_bind('img', '<B1-Motion>', self.dragged)
+
     def init_various(self):
         self.pressed_x = pressed_y = 0
         self.item_id = -1
-        
-        #関数をバインドする
-        self.canvas.tag_bind('img', '<ButtonPress-1>', self.pressed)
-        self.canvas.tag_bind("img", "<B1-Motion>", self.dragged)
-        
+
+    def init_menu(self):
+        #メニューを生成
+        self.mbar = tk.Menu()
+        #メニューコマンドを生成
+        self.mcom = tk.Menu(self.mbar,tearoff=0)
+        #コマンドを追加
+        self.mcom.add_command(label='読み込み',command=self.load_sprite)
+        self.mbar.add_cascade(label='ファイル',menu=self.mcom)
+        self.master['menu'] = self.mbar
+
+
 root = tk.Tk()
 app = Application(master=root)
 app.mainloop()
