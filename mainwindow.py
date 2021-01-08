@@ -24,16 +24,6 @@ class Application(tk.Frame):
         self.init_rectangle()
         #メニューの初期化
         self.init_menu()
-        
-    def init_rectangle(self):
-        self.rect_start_x = None
-        self.rect_start_y = None
-        self.rect = None
-
-    def init_canvas(self):
-        #キャンバス作って
-        self.canvas = tk.Canvas(self, width=self.CANVAS_WIDTH,height=self.CANVAS_WIDTH, bg='white')
-        self.canvas.pack()
       
 
     #画像がクリックされたときの処理
@@ -115,6 +105,17 @@ class Application(tk.Frame):
         self.canvas.create_image(200, 200, image=self.tkimg, tags='img')
         #画像のサイズを取得
         self.sprite_size = img.size
+        
+
+    def init_rectangle(self):
+        self.rect_start_x = None
+        self.rect_start_y = None
+        self.rect = None
+
+    def init_canvas(self):
+        #キャンバス作って
+        self.canvas = tk.Canvas(self, width=self.CANVAS_WIDTH,height=self.CANVAS_WIDTH, bg='white')
+        self.canvas.pack()
         #関数をバインドする
         self.canvas.tag_bind('img', '<ButtonPress-1>', self.pressed)
         self.canvas.tag_bind('img', '<B1-Motion>', self.dragged)
