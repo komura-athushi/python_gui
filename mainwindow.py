@@ -1,15 +1,14 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import filedialog
+from tkinter import messagebox
 from PIL import Image, ImageTk
 import myimage
+import constant
+
 
 class Application(tk.Frame):
-    #キャンバスの大きさ
-    CANVAS_WIDTH = 1280
-    CANVAS_HEIGHT = 720
-    #枠のサイズを画像より少し大きくする
-    ADD_FRAME_SIZE = 1
+    
 
     def __init__(self, master=None):
         super().__init__(master)
@@ -58,10 +57,10 @@ class Application(tk.Frame):
             #左上のx座標、左上のy座標
             #右下のx座標、右下のy座標
             self.rect = self.canvas.create_rectangle(
-            image_position_x - image_size_x / 2 - self.ADD_FRAME_SIZE,
-            image_position_y + image_size_y / 2 + self.ADD_FRAME_SIZE,
-            image_position_x + image_size_x / 2 + self.ADD_FRAME_SIZE,
-            image_position_y - image_size_y / 2 - self.ADD_FRAME_SIZE,
+            image_position_x - image_size_x / 2 - constant.ADD_FRAME_SIZE,
+            image_position_y + image_size_y / 2 + constant.ADD_FRAME_SIZE,
+            image_position_x + image_size_x / 2 + constant.ADD_FRAME_SIZE,
+            image_position_y - image_size_y / 2 - constant.ADD_FRAME_SIZE,
             outline='red')
     
     #画像がドラッグされたときの処理
@@ -94,7 +93,7 @@ class Application(tk.Frame):
         self.pressed_y = event.y
 
     #ファイル読み込みが選択されたときの処理
-    def load_sprite(self):
+    def load_image(self):
         #読み込むファイルの拡張子を指定
         typ = [('png画像','*.png'),
         ('jpg画像','*.jpg')]
@@ -104,12 +103,27 @@ class Application(tk.Frame):
         myimg = myimage.MyImage()
         myimg.load_image(self.canvas,self.fn)
         self.myimage_list[myimg.item_id] = myimg
-        #このImageTk?は保持しておかないといけないらしい
-        #self.tkimg = ImageTk.PhotoImage(img)
-        #id = self.canvas.create_image(200, 200, image=self.tkimg, tags='img')
-        #画像のサイズを取得
-        #self.sprite_size = img.size
-        a = 0
+
+    def export_level(self):
+        #読み込むファイルの拡張子を指定
+        typ = [('レベル','*'+constant.file_extension)]
+        #ファイル選択ダイアログを表示
+        fn = filedialog.asksaveasfilename(filetypes=typ)
+        if fn.find(constant.file_extension) == -1:
+            fn += constant.file_extension
+        #ファイルをオープンする、withでcloseをしなくていいらしい
+        with open(fn,'wb') as file:
+            for i in self.myimage_list:
+                #画像の名前を書き出す
+                file.write(bytes((str(self.myimage_list[i].file_name) + ' ').encode()))
+                #画像の座標を取得
+                x,y = self.myimage_list[i].get_position(self.canvas)
+                #画像の座標を書き出す
+                file.write(bytes((str(x) + ' ').encode()))
+                file.write(bytes((str(y) + ' ').encode()))
+                file.write(bytes('\n'.encode()))
+        
+        messagebox.showinfo('メッセージ', '書き出しに成功しました！')
 
     #枠を初期化
     def init_rectangle(self):
@@ -120,11 +134,20 @@ class Application(tk.Frame):
     #キャンバスを初期化
     def init_canvas(self):
         #キャンバス作って
-        self.canvas = tk.Canvas(self, width=self.CANVAS_WIDTH,height=self.CANVAS_HEIGHT, bg='white')
+        self.canvas = tk.Canvas(self,
+        width=constant.CANVAS_WIDTH+constant.ADD_CANVAS_SIZE,
+        height=constant.CANVAS_HEIGHT+constant.ADD_CANVAS_SIZE,
+        bg='white')
         self.canvas.pack()
         #関数をバインドする
         self.canvas.tag_bind('img', '<ButtonPress-1>', self.pressed)
         self.canvas.tag_bind('img', '<B1-Motion>', self.dragged)
+        self.canvas_rect = self.canvas.create_rectangle(
+            constant.ADD_CANVAS_SIZE,
+            constant.ADD_CANVAS_SIZE,
+            constant.CANVAS_WIDTH,
+            constant.CANVAS_HEIGHT
+        )
 
     #色々初期化
     def init_various(self):
@@ -138,7 +161,8 @@ class Application(tk.Frame):
         #メニューコマンドを生成
         self.mcom = tk.Menu(self.mbar,tearoff=0)
         #コマンドを追加
-        self.mcom.add_command(label='読み込み',command=self.load_sprite)
+        self.mcom.add_command(label='画像読み込み',command=self.load_image)
+        self.mcom.add_command(label='レベル書き出し',command=self.export_level)
         self.mbar.add_cascade(label='ファイル',menu=self.mcom)
         self.master['menu'] = self.mbar
 
