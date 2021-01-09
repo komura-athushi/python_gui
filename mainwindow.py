@@ -2,13 +2,14 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import filedialog
 from PIL import Image, ImageTk
-
-#枠のサイズを画像より少し大きくする
-ADD_FRAME_SIZE = 1
+import myimage
 
 class Application(tk.Frame):
+    #キャンバスの大きさ
     CANVAS_WIDTH = 1280
     CANVAS_HEIGHT = 720
+    #枠のサイズを画像より少し大きくする
+    ADD_FRAME_SIZE = 1
 
     def __init__(self, master=None):
         super().__init__(master)
@@ -24,8 +25,11 @@ class Application(tk.Frame):
         self.init_rectangle()
         #メニューの初期化
         self.init_menu()
-      
 
+        #読み込んだ画像のリスト
+        self.myimage_list = {}
+
+      
     #画像がクリックされたときの処理
     def pressed(self,event):
         #枠が既に存在していたら
@@ -37,30 +41,28 @@ class Application(tk.Frame):
         else:
             #選択された画像を持ってくる
             self.item_id = self.canvas.find_closest(event.x, event.y)
-            tag = self.canvas.gettags(self.item_id[0])[0]
-            item = self.canvas.type(tag)
+            #tag = self.canvas.gettags(self.item_id[0])[0]
             #print(item)
             #print(tag)
             #クリックした場所を保存
             self.pressed_x = event.x
             self.pressed_y = event.y
             #画像の座標を持ってくる
-            self.sprite_position = self.canvas.coords(self.item_id)
+            self.image_position = self.canvas.coords(self.item_id)
             #画像の座標と大きさを取得する
-            sprite_position_x = self.sprite_position[0]
-            sprite_position_y = self.sprite_position[1]
-            sprite_size_x = self.sprite_size[0]
-            sprite_size_y = self.sprite_size[1]
+            image_position_x = self.image_position[0]
+            image_position_y = self.image_position[1]
+            image_size_x = self.myimage_list[self.item_id[0]].image_size[0]
+            image_size_y = self.myimage_list[self.item_id[0]].image_size[1]
             #枠を生成する、引数の順番は、
             #左上のx座標、左上のy座標
             #右下のx座標、右下のy座標
             self.rect = self.canvas.create_rectangle(
-            sprite_position_x - sprite_size_x / 2 - ADD_FRAME_SIZE,
-            sprite_position_y + sprite_size_y / 2 + ADD_FRAME_SIZE,
-            sprite_position_x + sprite_size_x / 2 + ADD_FRAME_SIZE,
-            sprite_position_y - sprite_size_y / 2 - ADD_FRAME_SIZE,
+            image_position_x - image_size_x / 2 - self.ADD_FRAME_SIZE,
+            image_position_y + image_size_y / 2 + self.ADD_FRAME_SIZE,
+            image_position_x + image_size_x / 2 + self.ADD_FRAME_SIZE,
+            image_position_y - image_size_y / 2 - self.ADD_FRAME_SIZE,
             outline='red')
-
     
     #画像がドラッグされたときの処理
     def dragged(self,event):
@@ -69,8 +71,8 @@ class Application(tk.Frame):
         if self.rect == None:
             return
         self.item_id = self.canvas.find_closest(event.x, event.y)
-        tag = self.canvas.gettags(self.item_id[0])[0]
-        item = self.canvas.type(tag) # rectangle image
+        #tag = self.canvas.gettags(self.item_id[0])[0]
+        #item = self.canvas.type(tag) # rectangle image
         #クリックした場所とドラッグした場所の差分を計算
         delta_x = event.x - self.pressed_x
         delta_y = event.y - self.pressed_y
@@ -98,32 +100,38 @@ class Application(tk.Frame):
         ('jpg画像','*.jpg')]
         #ファイル選択ダイアログを表示
         self.fn = filedialog.askopenfilename(filetypes=typ)
-         #画像読み込み
-        img = Image.open(self.fn)
+        #画像読み込み
+        myimg = myimage.MyImage()
+        myimg.load_image(self.canvas,self.fn)
+        self.myimage_list[myimg.item_id] = myimg
         #このImageTk?は保持しておかないといけないらしい
-        self.tkimg = ImageTk.PhotoImage(img)
-        self.canvas.create_image(200, 200, image=self.tkimg, tags='img')
+        #self.tkimg = ImageTk.PhotoImage(img)
+        #id = self.canvas.create_image(200, 200, image=self.tkimg, tags='img')
         #画像のサイズを取得
-        self.sprite_size = img.size
-        
+        #self.sprite_size = img.size
+        a = 0
 
+    #枠を初期化
     def init_rectangle(self):
         self.rect_start_x = None
         self.rect_start_y = None
         self.rect = None
 
+    #キャンバスを初期化
     def init_canvas(self):
         #キャンバス作って
-        self.canvas = tk.Canvas(self, width=self.CANVAS_WIDTH,height=self.CANVAS_WIDTH, bg='white')
+        self.canvas = tk.Canvas(self, width=self.CANVAS_WIDTH,height=self.CANVAS_HEIGHT, bg='white')
         self.canvas.pack()
         #関数をバインドする
         self.canvas.tag_bind('img', '<ButtonPress-1>', self.pressed)
         self.canvas.tag_bind('img', '<B1-Motion>', self.dragged)
 
+    #色々初期化
     def init_various(self):
         self.pressed_x = pressed_y = 0
         self.item_id = -1
 
+    #メニューを初期化
     def init_menu(self):
         #メニューを生成
         self.mbar = tk.Menu()
@@ -133,7 +141,6 @@ class Application(tk.Frame):
         self.mcom.add_command(label='読み込み',command=self.load_sprite)
         self.mbar.add_cascade(label='ファイル',menu=self.mcom)
         self.master['menu'] = self.mbar
-
 
 root = tk.Tk()
 app = Application(master=root)
