@@ -15,8 +15,10 @@ class Application(tk.Frame):
         #なんか作って
         self.master = master
         self.master.title('python gui')
-        #self.master.geometry("1310x750")
-        self.master.geometry("1500x750")
+        #self.master.geometry("1920x1080")
+        #ウィンドウ最大可
+        self.master.state('zoomed')
+        self.master.configure(bg=constant.WINDOW_COLOR)
         #これをしないとフレームがどうのこうので
         #placeしても表示されない
         self.pack(expand=1, fill=tk.BOTH)
@@ -169,8 +171,9 @@ class Application(tk.Frame):
         self.canvas = tk.Canvas(self,
         width=constant.CANVAS_WIDTH+constant.ADD_CANVAS_SIZE*2,
         height=constant.CANVAS_HEIGHT+constant.ADD_CANVAS_SIZE*2,
-        bg='white')
+        bg = constant.WINDOW_COLOR)
         self.canvas.place(x=0, y=0)
+
         #関数をバインドする
         self.canvas.tag_bind('img', '<ButtonPress-1>', self.pressed)
         self.canvas.tag_bind('img', '<B1-Motion>', self.dragged)
@@ -182,6 +185,8 @@ class Application(tk.Frame):
             constant.CANVAS_WIDTH + constant.ADD_CANVAS_SIZE,
             constant.CANVAS_HEIGHT + constant.ADD_CANVAS_SIZE
         )
+        self.canvas['bg'] = self.master['bg']
+        self.master.wm_attributes("-transparentcolor", constant.WINDOW_COLOR)
 
     #色々初期化
     def init_various(self):

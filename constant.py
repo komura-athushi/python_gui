@@ -9,3 +9,5 @@ ADD_FRAME_SIZE = 1
 ADD_CANVAS_SIZE = 15
 #レベルデータの拡張子
 FILE_EXTENSION = '.casl'
+#ウィンドウの色
+WINDOW_COLOR = 'ghost white'
