@@ -8,4 +8,4 @@ ADD_FRAME_SIZE = 1
 #キャンバスを少し大きくする
 ADD_CANVAS_SIZE = 15
 #レベルデータの拡張子
-file_extension = '.casl'
+FILE_EXTENSION = '.casl'

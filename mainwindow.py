@@ -15,7 +15,12 @@ class Application(tk.Frame):
         #なんか作って
         self.master = master
         self.master.title('python gui')
-        self.pack()
+        #self.master.geometry("1310x750")
+        self.master.geometry("1500x750")
+        #これをしないとフレームがどうのこうので
+        #placeしても表示されない
+        self.pack(expand=1, fill=tk.BOTH)
+        #self.pack()
         #キャンバスの初期化
         self.init_canvas()
         #色々初期化
@@ -31,28 +36,39 @@ class Application(tk.Frame):
       
     #画像がクリックされたときの処理
     def pressed(self,event):
+        #選択された画像を持ってくる
+        self.item_id = self.canvas.find_closest(event.x, event.y)
+        #tag = self.canvas.gettags(self.item_id[0])[0]
+        #print(item)
+        #print(tag)
+        #クリックした場所を保存
+        self.pressed_x = event.x
+        self.pressed_y = event.y
+        #画像の座標を持ってくる
+        self.image_position = self.canvas.coords(self.item_id)
+        #画像の座標と大きさを取得する
+        image_position_x = self.image_position[0]
+        image_position_y = self.image_position[1]
+        image_size_x = self.myimage_list[self.item_id[0]].image_size[0]
+        image_size_y = self.myimage_list[self.item_id[0]].image_size[1]
+        
         #枠が既に存在していたら
         if self.rect:
+            #pass
             #枠を削除する
-            self.canvas.delete(self.rect)
-            self.init_rectangle()
+            #self.canvas.delete(self.rect)
+            #self.init_rectangle()
+            #枠を動かす
+            #左上のx座標、左上のy座標
+            #右下のx座標、右下のy座標
+            self.canvas.coords(self.rect,
+            image_position_x - image_size_x / 2 - constant.ADD_FRAME_SIZE,
+            image_position_y + image_size_y / 2 + constant.ADD_FRAME_SIZE,
+            image_position_x + image_size_x / 2 + constant.ADD_FRAME_SIZE,
+            image_position_y - image_size_y / 2 - constant.ADD_FRAME_SIZE,
+            )
         #枠が存在していなければ
         else:
-            #選択された画像を持ってくる
-            self.item_id = self.canvas.find_closest(event.x, event.y)
-            #tag = self.canvas.gettags(self.item_id[0])[0]
-            #print(item)
-            #print(tag)
-            #クリックした場所を保存
-            self.pressed_x = event.x
-            self.pressed_y = event.y
-            #画像の座標を持ってくる
-            self.image_position = self.canvas.coords(self.item_id)
-            #画像の座標と大きさを取得する
-            image_position_x = self.image_position[0]
-            image_position_y = self.image_position[1]
-            image_size_x = self.myimage_list[self.item_id[0]].image_size[0]
-            image_size_y = self.myimage_list[self.item_id[0]].image_size[1]
             #枠を生成する、引数の順番は、
             #左上のx座標、左上のy座標
             #右下のx座標、右下のy座標
@@ -61,7 +77,7 @@ class Application(tk.Frame):
             image_position_y + image_size_y / 2 + constant.ADD_FRAME_SIZE,
             image_position_x + image_size_x / 2 + constant.ADD_FRAME_SIZE,
             image_position_y - image_size_y / 2 - constant.ADD_FRAME_SIZE,
-            outline='red')
+            outline='red')    
     
     #画像がドラッグされたときの処理
     def dragged(self,event):
@@ -106,11 +122,11 @@ class Application(tk.Frame):
 
     def export_level(self):
         #読み込むファイルの拡張子を指定
-        typ = [('レベル','*'+constant.file_extension)]
+        typ = [('レベル','*'+constant.FILE_EXTENSION)]
         #ファイル選択ダイアログを表示
         fn = filedialog.asksaveasfilename(filetypes=typ)
-        if fn.find(constant.file_extension) == -1:
-            fn += constant.file_extension
+        if fn.find(constant.FILE_EXTENSION) == -1:
+            fn += constant.FILE_EXTENSION
         #ファイルをオープンする、withでcloseをしなくていいらしい
         with open(fn,'wb') as file:
             for i in self.myimage_list:
@@ -119,8 +135,8 @@ class Application(tk.Frame):
                 #画像の座標を取得
                 x,y = self.myimage_list[i].get_position(self.canvas)
                 #画像の座標を書き出す
-                file.write(bytes((str(x) + ' ').encode()))
-                file.write(bytes((str(y) + ' ').encode()))
+                file.write(bytes((str(x-constant.ADD_CANVAS_SIZE) + ' ').encode()))
+                file.write(bytes((str(y-constant.ADD_CANVAS_SIZE) + ' ').encode()))
                 file.write(bytes('\n'.encode()))
         
         messagebox.showinfo('メッセージ', '書き出しに成功しました！')
@@ -131,22 +147,40 @@ class Application(tk.Frame):
         self.rect_start_y = None
         self.rect = None
 
+
+    #今は使ってない
+    #使うときが来るかもしれない
+    def on_resize(self,event):
+        # 右下のCanvasをリサイズに合わせて高さを自動調整
+        #self.height = self.frame.winfo_height() - 30 # 30 == canvas.height
+        width = event.width
+        height = event.height
+        xx=width-(constant.CANVAS_WIDTH+constant.ADD_CANVAS_SIZE*2)
+        #self.canvas.place_forget()
+        #self.canvas.place(x=xx,y=0)
+        #self.canvas.pack()
+        #self.canvas.place_forget()
+        #self.canvas.pack(side=tk.LEFT,anchor=tk.NE)
+        a = 0
+
     #キャンバスを初期化
     def init_canvas(self):
         #キャンバス作って
         self.canvas = tk.Canvas(self,
-        width=constant.CANVAS_WIDTH+constant.ADD_CANVAS_SIZE,
-        height=constant.CANVAS_HEIGHT+constant.ADD_CANVAS_SIZE,
+        width=constant.CANVAS_WIDTH+constant.ADD_CANVAS_SIZE*2,
+        height=constant.CANVAS_HEIGHT+constant.ADD_CANVAS_SIZE*2,
         bg='white')
-        self.canvas.pack()
+        self.canvas.place(x=0, y=0)
         #関数をバインドする
         self.canvas.tag_bind('img', '<ButtonPress-1>', self.pressed)
         self.canvas.tag_bind('img', '<B1-Motion>', self.dragged)
+        #self.master.bind("<Configure>", self.on_resize)
+        #720*1280の枠を作る
         self.canvas_rect = self.canvas.create_rectangle(
             constant.ADD_CANVAS_SIZE,
             constant.ADD_CANVAS_SIZE,
-            constant.CANVAS_WIDTH,
-            constant.CANVAS_HEIGHT
+            constant.CANVAS_WIDTH + constant.ADD_CANVAS_SIZE,
+            constant.CANVAS_HEIGHT + constant.ADD_CANVAS_SIZE
         )
 
     #色々初期化
