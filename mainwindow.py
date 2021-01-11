@@ -230,27 +230,24 @@ class Application(tk.Frame):
     #インスペクターウィンドウ？の初期化
     def init_inspector(self):
         #self.inspector = tk.Label(self.master,width=50,height=25)
+        #フレーム生成
         self.inspector = tk.Frame(self.master)
+        #フレームの中にキャンバス生成
         self.inspector_canvas = tk.Canvas(self.inspector,width=200,height=300)
         self.inspector.place(relx=0.855,rely=0)   
         self.inspector['bg']='yellow'
         self.inspector_canvas['bg'] = 'yellow'
         
+        #フレームを親にスクロールバーを生成
         bar_y = tk.Scrollbar(self.inspector,orient=tk.VERTICAL,command=self.inspector_canvas.yview)
+        #スクロールバーを配置
         bar_y.pack(side=tk.RIGHT, fill=tk.Y)
+        #キャンバスとスクロールバーを紐づける
         self.inspector_canvas.config(yscrollcommand=bar_y.set)
-        self.inspector_canvas.pack()
-        #bar_y.config(command=self.inspector.yview)
+        #スクロールの範囲を設定
         self.inspector_canvas.config(scrollregion=(0,0,2000,2000))
-        #self.inspector.config(yscrollcommand=bar_y.set)
-        
-        
-        #self.inspector_frame.config(command=self.inspector.yview)
-    
-        #self.inspector.config(scrollregion=(0, 5000, 00, 5000))
-
-        #self.inspector_frame = tk.Frame(self.inspector)  
-        #self.inspector.create_window( (0,0), window=self.inspector_frame, anchor=tk.NW, )
+        #キャンバスを設置、スクロールバーより後に配置すること！！
+        self.inspector_canvas.pack()
     def init_project(self):
         pass
     
