@@ -18,6 +18,7 @@ class Application(tk.Frame):
         #self.master.geometry("1920x1080")
         #ウィンドウ最大可
         self.master.state('zoomed')
+        #色
         self.master.configure(bg=constant.WINDOW_COLOR)
         #これをしないとフレームがどうのこうので
         #placeしても表示されない
@@ -31,7 +32,11 @@ class Application(tk.Frame):
         self.init_rectangle()
         #メニューの初期化
         self.init_menu()
+        #ラベルの初期化
+        self.init_label()
 
+        #指定した色を透過する
+        self.master.wm_attributes("-transparentcolor", constant.WINDOW_COLOR)
         #読み込んだ画像のリスト
         self.myimage_list = {}
 
@@ -149,6 +154,11 @@ class Application(tk.Frame):
         self.rect_start_y = None
         self.rect = None
 
+    def motion(self,event):
+        #マウス座標を取得する
+        self.label['text'] = 'x : {}, y : {}'.format(event.x - constant.ADD_CANVAS_SIZE,event.y - constant.ADD_CANVAS_SIZE)
+
+
 
     #今は使ってない
     #使うときが来るかもしれない
@@ -177,7 +187,8 @@ class Application(tk.Frame):
         #関数をバインドする
         self.canvas.tag_bind('img', '<ButtonPress-1>', self.pressed)
         self.canvas.tag_bind('img', '<B1-Motion>', self.dragged)
-        #self.master.bind("<Configure>", self.on_resize)
+        #マウスの座標を表示したい
+        self.canvas.bind('<Motion>', self.motion)
         #720*1280の枠を作る
         self.canvas_rect = self.canvas.create_rectangle(
             constant.ADD_CANVAS_SIZE,
@@ -185,8 +196,10 @@ class Application(tk.Frame):
             constant.CANVAS_WIDTH + constant.ADD_CANVAS_SIZE,
             constant.CANVAS_HEIGHT + constant.ADD_CANVAS_SIZE
         )
-        self.canvas['bg'] = self.master['bg']
-        self.master.wm_attributes("-transparentcolor", constant.WINDOW_COLOR)
+        #キャンバスの色をウィンドウの色と同じにする
+        #self.canvas['bg'] = self.master['bg']
+        self.canvas['bg'] = constant.CANVAS_COLOR
+        
 
     #色々初期化
     def init_various(self):
@@ -205,6 +218,13 @@ class Application(tk.Frame):
         self.mbar.add_cascade(label='ファイル',menu=self.mcom)
         self.master['menu'] = self.mbar
 
+    #ラベルを初期化
+    def init_label(self):
+        self.label = tk.Label(self.master,text='x : y :')
+        self.label.place(relx=constant.LABEL_RELX, rely=constant.LABEL_RELY)
+
+
+    
 root = tk.Tk()
 app = Application(master=root)
 app.mainloop()

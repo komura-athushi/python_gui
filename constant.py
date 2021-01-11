@@ -10,4 +10,10 @@ ADD_CANVAS_SIZE = 15
 #レベルデータの拡張子
 FILE_EXTENSION = '.casl'
 #ウィンドウの色
-WINDOW_COLOR = 'ghost white'
+WINDOW_COLOR = 'gray69'
+#キャンバスの色
+CANVAS_COLOR = 'white'
+
+#マウス座標表示のラベルの座標
+LABEL_RELX=0.01 
+LABEL_RELY=0.965

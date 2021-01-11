@@ -22,8 +22,8 @@ class MyImage():
         img = Image.open(file)
         #このImageTk?は保持しておかないといけないらしい
         self.tkimg = ImageTk.PhotoImage(img)
-        self.item_id = canvas.create_image(constant.CANVAS_WIDTH/2,
-        constant.CANVAS_HEIGHT/2,
+        self.item_id = canvas.create_image(constant.CANVAS_WIDTH/2 + constant.ADD_CANVAS_SIZE,
+        constant.CANVAS_HEIGHT/2 + constant.ADD_CANVAS_SIZE,
         image=self.tkimg,
         tags='img')
         #画像のサイズを取得
