@@ -34,6 +34,10 @@ class Application(tk.Frame):
         self.init_menu()
         #ラベルの初期化
         self.init_label()
+        #インスペクターウィンドウ？の初期化
+        self.init_inspector()
+        #プロジェクトウィンドウ？の初期化
+        self.init_project()
 
         #指定した色を透過する
         self.master.wm_attributes("-transparentcolor", constant.WINDOW_COLOR)
@@ -223,7 +227,32 @@ class Application(tk.Frame):
         self.label = tk.Label(self.master,text='x : y :')
         self.label.place(relx=constant.LABEL_RELX, rely=constant.LABEL_RELY)
 
+    #インスペクターウィンドウ？の初期化
+    def init_inspector(self):
+        #self.inspector = tk.Label(self.master,width=50,height=25)
+        self.inspector = tk.Frame(self.master)
+        self.inspector_canvas = tk.Canvas(self.inspector,width=200,height=300)
+        self.inspector.place(relx=0.855,rely=0)   
+        self.inspector['bg']='yellow'
+        self.inspector_canvas['bg'] = 'yellow'
+        
+        bar_y = tk.Scrollbar(self.inspector,orient=tk.VERTICAL,command=self.inspector_canvas.yview)
+        bar_y.pack(side=tk.RIGHT, fill=tk.Y)
+        self.inspector_canvas.config(yscrollcommand=bar_y.set)
+        self.inspector_canvas.pack()
+        #bar_y.config(command=self.inspector.yview)
+        self.inspector_canvas.config(scrollregion=(0,0,2000,2000))
+        #self.inspector.config(yscrollcommand=bar_y.set)
+        
+        
+        #self.inspector_frame.config(command=self.inspector.yview)
+    
+        #self.inspector.config(scrollregion=(0, 5000, 00, 5000))
 
+        #self.inspector_frame = tk.Frame(self.inspector)  
+        #self.inspector.create_window( (0,0), window=self.inspector_frame, anchor=tk.NW, )
+    def init_project(self):
+        pass
     
 root = tk.Tk()
 app = Application(master=root)
