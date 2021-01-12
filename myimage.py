@@ -11,6 +11,7 @@ class MyImage():
         self.image_size = None
         self.tkimg = None
         self.file_name = None
+        self.name = None
 
     #画像の座標を取得
     def get_position(self,canvas):
@@ -18,6 +19,7 @@ class MyImage():
     
     #画像を読み込む
     def load_image(self,canvas,file):
+        self.file_name = file
         #画像読み込み
         img = Image.open(file)
         #このImageTk?は保持しておかないといけないらしい
@@ -32,9 +34,10 @@ class MyImage():
         slash_number = file.rfind('/')
         number = file.rfind('.')
         if slash_number == -1:
-            self.file_name = file[:number]
+            self.name = file[:number]
         else:
-            self.file_name = file[slash_number + 1:number]
+            self.name = file[slash_number + 1:number]
+        print(self.name)
         print(self.file_name)
 
 

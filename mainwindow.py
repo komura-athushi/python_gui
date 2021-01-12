@@ -130,6 +130,8 @@ class Application(tk.Frame):
         myimg = myimage.MyImage()
         myimg.load_image(self.canvas,self.fn)
         self.myimage_list[myimg.item_id] = myimg
+        #リストボックスに名前を追加
+        self.project_list.insert(tk.END, myimg.name)
 
     def export_level(self):
         #読み込むファイルの拡張子を指定
@@ -233,10 +235,15 @@ class Application(tk.Frame):
         #フレーム生成
         self.inspector = tk.Frame(self.master)
         #フレームの中にキャンバス生成
-        self.inspector_canvas = tk.Canvas(self.inspector,width=200,height=300)
-        self.inspector.place(relx=0.855,rely=0)   
-        self.inspector['bg']='yellow'
-        self.inspector_canvas['bg'] = 'yellow'
+        self.inspector_canvas = tk.Canvas(self.inspector,
+        width=constant.INSPECTOR_WIDTH,
+        height=constant.INSPECTOR_HEIGHT)
+        #キャンバス配置
+        self.inspector.place(relx=constant.INSPECTOR_RELX,
+        rely=constant.INSPECTOR_RELY)
+        #色   
+        self.inspector['bg']='white'
+        self.inspector_canvas['bg'] = 'white'
         
         #フレームを親にスクロールバーを生成
         bar_y = tk.Scrollbar(self.inspector,orient=tk.VERTICAL,command=self.inspector_canvas.yview)
@@ -248,8 +255,16 @@ class Application(tk.Frame):
         self.inspector_canvas.config(scrollregion=(0,0,2000,2000))
         #キャンバスを設置、スクロールバーより後に配置すること！！
         self.inspector_canvas.pack()
+    
+    #プロジェクトウィンドウ？の初期化
     def init_project(self):
-        pass
+        self.project = tk.Frame(self.master)
+        self.project_list = tk.Listbox(self.project,
+        listvariable=None,
+        selectmode='single',width=33,height=21)
+        self.project.place(relx=constant.INSPECTOR_RELX,
+        rely=0.5177)
+        self.project_list.pack()
     
 root = tk.Tk()
 app = Application(master=root)
