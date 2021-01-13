@@ -40,28 +40,18 @@ class Application(tk.Frame):
         self.init_project()
 
         #指定した色を透過する
-        self.master.wm_attributes("-transparentcolor", constant.WINDOW_COLOR)
+        #self.master.wm_attributes("-transparentcolor", constant.WINDOW_COLOR)
         #読み込んだ画像のリスト
         self.myimage_list = {}
 
-      
-    #画像がクリックされたときの処理
-    def pressed(self,event):
-        #選択された画像を持ってくる
-        self.item_id = self.canvas.find_closest(event.x, event.y)
-        #tag = self.canvas.gettags(self.item_id[0])[0]
-        #print(item)
-        #print(tag)
-        #クリックした場所を保存
-        self.pressed_x = event.x
-        self.pressed_y = event.y
+    def select_image(self):
         #画像の座標を持ってくる
         self.image_position = self.canvas.coords(self.item_id)
         #画像の座標と大きさを取得する
         image_position_x = self.image_position[0]
         image_position_y = self.image_position[1]
-        image_size_x = self.myimage_list[self.item_id[0]].image_size[0]
-        image_size_y = self.myimage_list[self.item_id[0]].image_size[1]
+        image_size_x = self.myimage_list[self.item_id].image_size[0]
+        image_size_y = self.myimage_list[self.item_id].image_size[1]
         
         #枠が既に存在していたら
         if self.rect:
@@ -88,7 +78,40 @@ class Application(tk.Frame):
             image_position_y + image_size_y / 2 + constant.ADD_FRAME_SIZE,
             image_position_x + image_size_x / 2 + constant.ADD_FRAME_SIZE,
             image_position_y - image_size_y / 2 - constant.ADD_FRAME_SIZE,
-            outline='red')    
+            outline='red')
+        #選択した画像を上に持ってくる
+        self.canvas.tag_raise(self.item_id)       
+
+    def select_listbox(self,event):
+        number = self.project_list.curselection()
+        i = event
+        number2 = 0
+        for i in self.myimage_list:
+            if number[0] == number2:
+                self.item_id = self.myimage_list[i].item_id
+                break
+            number2+=1
+        self.select_image()
+            
+    #画像がクリックされたときの処理
+    def pressed(self,event):
+        #選択された画像を持ってくる
+        self.item_id = self.canvas.find_closest(event.x, event.y)[0]
+        #tag = self.canvas.gettags(self.item_id[0])[0]
+        #print(item)
+        #print(tag)
+        #クリックした場所を保存
+        self.pressed_x = event.x
+        self.pressed_y = event.y
+        self.select_image()
+        self.project_list.selection_clear(0, tk.END)
+        number = 0
+        for i in self.myimage_list:
+            if self.item_id == self.myimage_list[i].item_id:
+                break
+            number+=1
+        #リストボックスを選択
+        self.project_list.select_set(number)
     
     #画像がドラッグされたときの処理
     def dragged(self,event):
@@ -96,7 +119,7 @@ class Application(tk.Frame):
         #画像を動かす処理をしない
         if self.rect == None:
             return
-        self.item_id = self.canvas.find_closest(event.x, event.y)
+        self.item_id = self.canvas.find_closest(event.x, event.y)[0]
         #tag = self.canvas.gettags(self.item_id[0])[0]
         #item = self.canvas.type(tag) # rectangle image
         #クリックした場所とドラッグした場所の差分を計算
@@ -132,6 +155,19 @@ class Application(tk.Frame):
         self.myimage_list[myimg.item_id] = myimg
         #リストボックスに名前を追加
         self.project_list.insert(tk.END, myimg.name)
+
+        #レクタングルを設定して、リストボックスも選択する
+        self.item_id = myimg.item_id
+        self.select_image()
+        self.project_list.selection_clear(0, tk.END)
+        number = 0
+        for i in self.myimage_list:
+            if self.item_id == self.myimage_list[i].item_id:
+                break
+            number+=1
+        #リストボックスを選択
+        self.project_list.select_set(number)
+
 
     def export_level(self):
         #読み込むファイルの拡張子を指定
@@ -211,6 +247,7 @@ class Application(tk.Frame):
     def init_various(self):
         self.pressed_x = pressed_y = 0
         self.item_id = -1
+        self.item_id_list = -1
 
     #メニューを初期化
     def init_menu(self):
@@ -261,9 +298,12 @@ class Application(tk.Frame):
         self.project = tk.Frame(self.master)
         self.project_list = tk.Listbox(self.project,
         listvariable=None,
-        selectmode='single',width=33,height=21)
+        selectmode='single',
+        width=constant.PROJECT_WIDTH,
+        height=constant.PROJECT_HEIGHT,)
+        self.project_list.bind('<<ListboxSelect>>', self.select_listbox)
         self.project.place(relx=constant.INSPECTOR_RELX,
-        rely=0.5177)
+        rely=constant.PROJECT_RELY)
         self.project_list.pack()
     
 root = tk.Tk()
