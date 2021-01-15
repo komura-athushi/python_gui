@@ -174,6 +174,9 @@ class Application(tk.Frame):
         typ = [('レベル','*'+constant.FILE_EXTENSION)]
         #ファイル選択ダイアログを表示
         fn = filedialog.asksaveasfilename(filetypes=typ)
+        #保存先のファイルが何も選択されてない場合は以下の処理をしない
+        if fn == '':
+            return
         if fn.find(constant.FILE_EXTENSION) == -1:
             fn += constant.FILE_EXTENSION
         #ファイルをオープンする、withでcloseをしなくていいらしい
@@ -283,11 +286,11 @@ class Application(tk.Frame):
         self.inspector_canvas['bg'] = 'white'
         
         #フレームを親にスクロールバーを生成
-        bar_y = tk.Scrollbar(self.inspector,orient=tk.VERTICAL,command=self.inspector_canvas.yview)
+        self.inspector_bar_y = tk.Scrollbar(self.inspector,orient=tk.VERTICAL,command=self.inspector_canvas.yview)
         #スクロールバーを配置
-        bar_y.pack(side=tk.RIGHT, fill=tk.Y)
+        self.inspector_bar_y.pack(side=tk.RIGHT, fill=tk.Y)
         #キャンバスとスクロールバーを紐づける
-        self.inspector_canvas.config(yscrollcommand=bar_y.set)
+        self.inspector_canvas.config(yscrollcommand=self.inspector_bar_y.set)
         #スクロールの範囲を設定
         self.inspector_canvas.config(scrollregion=(0,0,2000,2000))
         #キャンバスを設置、スクロールバーより後に配置すること！！
@@ -304,6 +307,16 @@ class Application(tk.Frame):
         self.project_list.bind('<<ListboxSelect>>', self.select_listbox)
         self.project.place(relx=constant.INSPECTOR_RELX,
         rely=constant.PROJECT_RELY)
+
+        #フレームを親にスクロールバーを生成
+        self.project_bar_y = tk.Scrollbar(self.project,orient=tk.VERTICAL,command=self.project_list.yview)
+        #スクロールバーを配置
+        self.project_bar_y.pack(side=tk.RIGHT, fill=tk.Y)
+        #キャンバスとスクロールバーを紐づける
+        self.project_list.config(yscrollcommand=self.project_bar_y.set)
+        #なんかよくわからんがスクロールバーが自動で調整される
+        self.project_list.see('end')
+
         self.project_list.pack()
     
 root = tk.Tk()
