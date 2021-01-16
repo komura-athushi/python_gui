@@ -45,13 +45,16 @@ class Application(tk.Frame):
         self.myimage_list = {}
 
     def select_image(self):
+        try:
         #画像の座標を持ってくる
-        self.image_position = self.canvas.coords(self.item_id)
-        #画像の座標と大きさを取得する
-        image_position_x = self.image_position[0]
-        image_position_y = self.image_position[1]
-        image_size_x = self.myimage_list[self.item_id].image_size[0]
-        image_size_y = self.myimage_list[self.item_id].image_size[1]
+            self.image_position = self.canvas.coords(self.item_id)
+            #画像の座標と大きさを取得する
+            image_position_x = self.image_position[0]
+            image_position_y = self.image_position[1]
+            image_size_x = self.myimage_list[self.item_id].image_size[0]
+            image_size_y = self.myimage_list[self.item_id].image_size[1]
+        except:
+            return
         
         #枠が既に存在していたら
         if self.rect:
@@ -211,6 +214,9 @@ class Application(tk.Frame):
 
     def duplicate_image(self):
         number = self.project_list.curselection()
+        #何も選択されてなかったら処理をしない
+        if len(number) == 0:
+            return
         number2 = 0
         fn = None
         for i in self.myimage_list:
@@ -219,6 +225,27 @@ class Application(tk.Frame):
                 break
             number2+=1
         self.load_image(fn)
+        
+    def delete_image(self):
+        number = self.project_list.curselection()
+        #何も選択されてなかったら処理をしない
+        if len(number) == 0:
+            return
+        self.project_list.delete(number)
+        number2 = 0
+        fn = None
+        for i in self.myimage_list:
+            if number[0] == number2:
+                #画像をキャンバスから削除
+                self.canvas.delete(self.myimage_list[i].item_id)
+                #リストから削除
+                self.myimage_list.pop(i)
+                break
+            number2+=1
+        #枠を削除する
+        self.canvas.delete(self.rect)
+        self.init_rectangle()
+        self.item_id = None
         
 
     #今は使ってない
@@ -340,6 +367,12 @@ class Application(tk.Frame):
         text='複製',
         command=self.duplicate_image)
         self.duplicate_button.pack(side=tk.LEFT)
+
+        self.delete_button = ttk.Button(
+        self.project,
+        text='削除',
+        command=self.delete_image)
+        self.delete_button.pack(side=tk.LEFT)
 
         
 
