@@ -84,7 +84,6 @@ class Application(tk.Frame):
 
     def select_listbox(self,event):
         number = self.project_list.curselection()
-        i = event
         number2 = 0
         for i in self.myimage_list:
             if number[0] == number2:
@@ -143,28 +142,35 @@ class Application(tk.Frame):
         self.pressed_y = event.y
 
     #ファイル読み込みが選択されたときの処理
-    def load_image(self):
-        #読み込むファイルの拡張子を指定
-        typ = [('png画像','*.png'),
-        ('jpg画像','*.jpg')]
-        #ファイル選択ダイアログを表示
-        self.fn = filedialog.askopenfilename(filetypes=typ)
+    def load_image(self,fn=None,list_number=None):
+        
+        if fn == None:
+            #読み込むファイルの拡張子を指定
+            typ = [('png画像','*.png'),
+                ('jpg画像','*.jpg')]
+            #ファイル選択ダイアログを表示
+            fn = filedialog.askopenfilename(filetypes=typ)
         #画像読み込み
         myimg = myimage.MyImage()
-        myimg.load_image(self.canvas,self.fn)
+        myimg.load_image(self.canvas,fn)
         self.myimage_list[myimg.item_id] = myimg
         #リストボックスに名前を追加
-        self.project_list.insert(tk.END, myimg.name)
-
+        if list_number == None:
+            self.project_list.insert(tk.END, myimg.name)
+        else:
+            self.project_list.insert(list_number, myimg.name)
         #レクタングルを設定して、リストボックスも選択する
         self.item_id = myimg.item_id
         self.select_image()
         self.project_list.selection_clear(0, tk.END)
         number = 0
-        for i in self.myimage_list:
-            if self.item_id == self.myimage_list[i].item_id:
-                break
-            number+=1
+        if list_number == None:
+            for i in self.myimage_list:
+                if self.item_id == self.myimage_list[i].item_id:
+                    break
+                number+=1
+        else:
+            number = list_number+1
         #リストボックスを選択
         self.project_list.select_set(number)
 
@@ -203,7 +209,17 @@ class Application(tk.Frame):
         #マウス座標を取得する
         self.label['text'] = 'x : {}, y : {}'.format(event.x - constant.ADD_CANVAS_SIZE,event.y - constant.ADD_CANVAS_SIZE)
 
-
+    def duplicate_image(self):
+        number = self.project_list.curselection()
+        number2 = 0
+        fn = None
+        for i in self.myimage_list:
+            if number[0] == number2:
+                fn = self.myimage_list[i].file_name
+                break
+            number2+=1
+        self.load_image(fn)
+        
 
     #今は使ってない
     #使うときが来るかもしれない
@@ -218,7 +234,7 @@ class Application(tk.Frame):
         #self.canvas.pack()
         #self.canvas.place_forget()
         #self.canvas.pack(side=tk.LEFT,anchor=tk.NE)
-        a = 0
+
 
     #キャンバスを初期化
     def init_canvas(self):
@@ -303,7 +319,7 @@ class Application(tk.Frame):
         listvariable=None,
         selectmode='single',
         width=constant.PROJECT_WIDTH,
-        height=constant.PROJECT_HEIGHT,)
+        height=constant.PROJECT_HEIGHT)
         self.project_list.bind('<<ListboxSelect>>', self.select_listbox)
         self.project.place(relx=constant.INSPECTOR_RELX,
         rely=constant.PROJECT_RELY)
@@ -316,8 +332,17 @@ class Application(tk.Frame):
         self.project_list.config(yscrollcommand=self.project_bar_y.set)
         #なんかよくわからんがスクロールバーが自動で調整される
         self.project_list.see('end')
-
+        #リストを設置
         self.project_list.pack()
+        
+        self.duplicate_button = ttk.Button(
+        self.project,
+        text='複製',
+        command=self.duplicate_image)
+        self.duplicate_button.pack(side=tk.LEFT)
+
+        
+
     
 root = tk.Tk()
 app = Application(master=root)
