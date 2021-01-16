@@ -87,6 +87,9 @@ class Application(tk.Frame):
 
     def select_listbox(self,event):
         number = self.project_list.curselection()
+        #何も選択されてなかったら処理しない
+        if len(number) == 0:
+            return
         number2 = 0
         for i in self.myimage_list:
             if number[0] == number2:
