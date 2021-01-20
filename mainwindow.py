@@ -83,7 +83,11 @@ class Application(tk.Frame):
             image_position_y - image_size_y / 2 - constant.ADD_FRAME_SIZE,
             outline='red')
         #選択した画像を上に持ってくる
-        self.canvas.tag_raise(self.item_id)       
+        self.canvas.tag_raise(self.item_id)
+
+        #インスペクターウィンドウに情報を反映させる
+        self.inspector_image_name_entry.delete(0, tk.END)
+        self.inspector_image_name_entry.insert(tk.END,self.myimage_list[self.item_id].name)       
 
     def select_listbox(self,event):
         number = self.project_list.curselection()
@@ -215,6 +219,7 @@ class Application(tk.Frame):
         #マウス座標を取得する
         self.label['text'] = 'x : {}, y : {}'.format(event.x - constant.ADD_CANVAS_SIZE,event.y - constant.ADD_CANVAS_SIZE)
 
+    #画像を複製する
     def duplicate_image(self):
         number = self.project_list.curselection()
         #何も選択されてなかったら処理をしない
@@ -229,6 +234,7 @@ class Application(tk.Frame):
             number2+=1
         self.load_image(fn)
         
+    #画像を削除する
     def delete_image(self):
         number = self.project_list.curselection()
         #何も選択されてなかったら処理をしない
@@ -250,6 +256,8 @@ class Application(tk.Frame):
         self.init_rectangle()
         self.item_id = None
         
+    def apply_input_information(self):
+        pass
 
     #今は使ってない
     #使うときが来るかもしれない
@@ -274,6 +282,7 @@ class Application(tk.Frame):
         height=constant.CANVAS_HEIGHT+constant.ADD_CANVAS_SIZE*2,
         bg = constant.WINDOW_COLOR)
         self.canvas.place(x=0, y=0)
+        #self.canvas.pack(side=tk.LEFT)
 
         #関数をバインドする
         self.canvas.tag_bind('img', '<ButtonPress-1>', self.pressed)
@@ -317,30 +326,18 @@ class Application(tk.Frame):
 
     #インスペクターウィンドウ？の初期化
     def init_inspector(self):
-        #self.inspector = tk.Label(self.master,width=50,height=25)
-        #フレーム生成
-        self.inspector = tk.Frame(self.master)
-        #フレームの中にキャンバス生成
-        self.inspector_canvas = tk.Canvas(self.inspector,
-        width=constant.INSPECTOR_WIDTH,
-        height=constant.INSPECTOR_HEIGHT)
-        #キャンバス配置
-        self.inspector.place(relx=constant.INSPECTOR_RELX,
-        rely=constant.INSPECTOR_RELY)
-        #色   
-        self.inspector['bg']='white'
-        self.inspector_canvas['bg'] = 'white'
-        
-        #フレームを親にスクロールバーを生成
-        self.inspector_bar_y = tk.Scrollbar(self.inspector,orient=tk.VERTICAL,command=self.inspector_canvas.yview)
-        #スクロールバーを配置
-        self.inspector_bar_y.pack(side=tk.RIGHT, fill=tk.Y)
-        #キャンバスとスクロールバーを紐づける
-        self.inspector_canvas.config(yscrollcommand=self.inspector_bar_y.set)
-        #スクロールの範囲を設定
-        self.inspector_canvas.config(scrollregion=(0,0,2000,2000))
-        #キャンバスを設置、スクロールバーより後に配置すること！！
-        self.inspector_canvas.pack()
+        #ラベル配置
+        self.inspector = tk.Frame(self.master,width=200,height=400)
+        #self.inspector['bg'] = 'white'
+        self.inspector.place(relx=constant.INSPECTOR_RELX,rely=constant.INSPECTOR_RELY)
+
+        self.inspector_image_name = tk.Label(self.inspector,text='名前')
+        self.inspector_image_name.place(x=0,y=5)
+        self.inspector_image_name_entry = tk.Entry(self.inspector,width=33)
+        self.inspector_image_name_entry.place(x=0,y=25)
+
+        self.inspector_button = tk.Button(self.inspector,text='反映',command=self.apply_input_information)
+        self.inspector_button.place(x=75,y=360)
     
     #プロジェクトウィンドウ？の初期化
     def init_project(self):
@@ -365,12 +362,14 @@ class Application(tk.Frame):
         #リストを設置
         self.project_list.pack()
         
+        #画像の複製ボタンを生成
         self.duplicate_button = ttk.Button(
         self.project,
         text='複製',
         command=self.duplicate_image)
         self.duplicate_button.pack(side=tk.LEFT)
 
+        #画像の削除ボタンを生成
         self.delete_button = ttk.Button(
         self.project,
         text='削除',
