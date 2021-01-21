@@ -157,7 +157,7 @@ class Application(tk.Frame):
         self.pressed_y = event.y
 
     #ファイル読み込みが選択されたときの処理
-    def load_image(self,fn=None,list_number=None):
+    def load_image(self,fn=None,image_name=None,list_number=None):
         
         if fn == None:
             #読み込むファイルの拡張子を指定
@@ -168,6 +168,8 @@ class Application(tk.Frame):
         #画像読み込み
         myimg = myimage.MyImage()
         myimg.load_image(self.canvas,fn)
+        if image_name != None:
+            myimg.name = image_name
         self.myimage_list[myimg.item_id] = myimg
         #リストボックスに名前を追加
         if list_number == None:
@@ -234,12 +236,14 @@ class Application(tk.Frame):
             return
         number2 = 0
         fn = None
+        image_name = None
         for i in self.myimage_list:
             if number[0] == number2:
                 fn = self.myimage_list[i].file_name
+                image_name = self.myimage_list[i].name
                 break
             number2+=1
-        self.load_image(fn)
+        self.load_image(fn,image_name)
         
     #画像を削除する
     def delete_image(self):
@@ -351,7 +355,7 @@ class Application(tk.Frame):
         self.inspector_image_name_entry = tk.Entry(self.inspector,width=33)
         self.inspector_image_name_entry.place(x=0,y=25)
 
-        self.inspector_button = tk.Button(self.inspector,text='反映',command=self.apply_input_information)
+        self.inspector_button = tk.Button(self.inspector,text='反映する',command=self.apply_input_information)
         self.inspector_button.place(x=75,y=360)
     
     #プロジェクトウィンドウ？の初期化
