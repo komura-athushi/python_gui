@@ -44,6 +44,9 @@ class Application(tk.Frame):
         #読み込んだ画像のリスト
         self.myimage_list = {}
 
+        #セレクトしている画像
+        self.number_image = None
+
     def select_image(self):
         try:
         #画像の座標を持ってくる
@@ -101,6 +104,7 @@ class Application(tk.Frame):
                 break
             number2+=1
         self.select_image()
+        self.number_image = number[0]
             
     #画像がクリックされたときの処理
     def pressed(self,event):
@@ -121,6 +125,7 @@ class Application(tk.Frame):
             number+=1
         #リストボックスを選択
         self.project_list.select_set(number)
+        self.number_image = number
     
     #画像がドラッグされたときの処理
     def dragged(self,event):
@@ -183,8 +188,9 @@ class Application(tk.Frame):
             number = list_number+1
         #リストボックスを選択
         self.project_list.select_set(number)
+        self.number_image = number
 
-
+    #レベルデータを出力する
     def export_level(self):
         #読み込むファイルの拡張子を指定
         typ = [('レベル','*'+constant.FILE_EXTENSION)]
@@ -215,6 +221,7 @@ class Application(tk.Frame):
         self.rect_start_y = None
         self.rect = None
 
+    #マウスが動いた時の処理
     def motion(self,event):
         #マウス座標を取得する
         self.label['text'] = 'x : {}, y : {}'.format(event.x - constant.ADD_CANVAS_SIZE,event.y - constant.ADD_CANVAS_SIZE)
@@ -255,9 +262,17 @@ class Application(tk.Frame):
         self.canvas.delete(self.rect)
         self.init_rectangle()
         self.item_id = None
+        self.number_image = None
         
     def apply_input_information(self):
-        pass
+        #何も選択されてなかったら処理しない
+        if self.number_image == None:
+            return
+        self.project_list.delete(self.number_image)
+        self.myimage_list[self.item_id].name = self.inspector_image_name_entry.get()
+        self.project_list.insert(self.number_image, self.myimage_list[self.item_id].name)
+
+        
 
     #今は使ってない
     #使うときが来るかもしれない
