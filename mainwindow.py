@@ -62,32 +62,18 @@ class Application(tk.Frame):
         except:
             return
         
-        #枠が既に存在していたら
-        if self.rect:
-            #pass
-            #枠を削除する
-            #self.canvas.delete(self.rect)
-            #self.init_rectangle()
-            #枠を動かす
-            #左上のx座標、左上のy座標
-            #右下のx座標、右下のy座標
-            self.canvas.coords(self.rect,
-            image_position_x - image_size_x / 2 - constant.ADD_FRAME_SIZE,
-            image_position_y + image_size_y / 2 + constant.ADD_FRAME_SIZE,
-            image_position_x + image_size_x / 2 + constant.ADD_FRAME_SIZE,
-            image_position_y - image_size_y / 2 - constant.ADD_FRAME_SIZE,
-            )
-        #枠が存在していなければ
-        else:
-            #枠を生成する、引数の順番は、
-            #左上のx座標、左上のy座標
-            #右下のx座標、右下のy座標
-            self.rect = self.canvas.create_rectangle(
-            image_position_x - image_size_x / 2 - constant.ADD_FRAME_SIZE,
-            image_position_y + image_size_y / 2 + constant.ADD_FRAME_SIZE,
-            image_position_x + image_size_x / 2 + constant.ADD_FRAME_SIZE,
-            image_position_y - image_size_y / 2 - constant.ADD_FRAME_SIZE,
-            outline='red')
+        #枠を削除する
+        self.canvas.delete(self.rect)
+        self.init_rectangle()        
+        #枠を生成する、引数の順番は、
+        #左上のx座標、左上のy座標
+        #右下のx座標、右下のy座標
+        self.rect = self.canvas.create_rectangle(
+        image_position_x - image_size_x / 2 - constant.ADD_FRAME_SIZE,
+        image_position_y + image_size_y / 2 + constant.ADD_FRAME_SIZE,
+        image_position_x + image_size_x / 2 + constant.ADD_FRAME_SIZE,
+        image_position_y - image_size_y / 2 - constant.ADD_FRAME_SIZE,
+        outline='red')
         #選択した画像を上に持ってくる
         self.canvas.tag_raise(self.item_id)
 
