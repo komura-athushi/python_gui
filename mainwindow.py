@@ -3,8 +3,11 @@ import tkinter.ttk as ttk
 from tkinter import filedialog
 from tkinter import messagebox
 from PIL import Image, ImageTk
+import re
+
 import myimage
 import constant
+
 
 
 class Application(tk.Frame):
@@ -90,7 +93,14 @@ class Application(tk.Frame):
 
         #インスペクターウィンドウに情報を反映させる
         self.inspector_image_name_entry.delete(0, tk.END)
-        self.inspector_image_name_entry.insert(tk.END,self.myimage_list[self.item_id].name)       
+        self.inspector_image_name_entry.insert(tk.END,self.myimage_list[self.item_id].name)
+
+        self.inspector_image_position_x_entry.delete(0, tk.END)
+        self.inspector_image_position_y_entry.delete(0, tk.END)
+        position = self.myimage_list[self.item_id].get_position(self.canvas)
+        self.inspector_image_position_x_entry.insert(tk.END,position[0]-constant.ADD_CANVAS_SIZE)
+        self.inspector_image_position_y_entry.insert(tk.END,position[1]-constant.ADD_CANVAS_SIZE)
+
 
     def select_listbox(self,event):
         number = self.project_list.curselection()
@@ -155,6 +165,12 @@ class Application(tk.Frame):
         )
         self.pressed_x = event.x
         self.pressed_y = event.y
+
+        self.inspector_image_position_x_entry.delete(0, tk.END)
+        self.inspector_image_position_y_entry.delete(0, tk.END)
+        position = self.myimage_list[self.item_id].get_position(self.canvas)
+        self.inspector_image_position_x_entry.insert(tk.END,position[0]-constant.ADD_CANVAS_SIZE)
+        self.inspector_image_position_y_entry.insert(tk.END,position[1]-constant.ADD_CANVAS_SIZE)
 
     #ファイル読み込みが選択されたときの処理
     def load_image(self,fn=None,image_name=None,list_number=None):
@@ -268,6 +284,20 @@ class Application(tk.Frame):
         self.item_id = None
         self.number_image = None
         
+    #文字列検証関数、文字の入力を数字のみに制限させる
+    #Falseで入力拒否
+    def validation(self,before_word, after_word):
+        if len(after_word) == 0:
+            return True
+        #elif (after_word.isdecimal()):
+        #入力された文字が0～9の半角であれば
+        elif re.match(re.compile('[0-9]+'), after_word) or re.match(re.compile('-([0-9]+)'), after_word):
+            return True
+        else:
+            return False
+            
+    
+    #入力された情報を反映させる
     def apply_input_information(self):
         #何も選択されてなかったら処理しない
         if self.number_image == None:
@@ -276,7 +306,12 @@ class Application(tk.Frame):
         self.myimage_list[self.item_id].name = self.inspector_image_name_entry.get()
         self.project_list.insert(self.number_image, self.myimage_list[self.item_id].name)
 
-        
+        self.myimage_list[self.item_id].set_position(self.canvas,
+        float(self.inspector_image_position_x_entry.get())+constant.ADD_CANVAS_SIZE,
+        float(self.inspector_image_position_y_entry.get())+constant.ADD_CANVAS_SIZE)
+        #リストボックスを選択
+        self.project_list.select_set(self.number_image)
+        self.select_image()
 
     #今は使ってない
     #使うときが来るかもしれない
@@ -350,10 +385,35 @@ class Application(tk.Frame):
         #self.inspector['bg'] = 'white'
         self.inspector.place(relx=constant.INSPECTOR_RELX,rely=constant.INSPECTOR_RELY)
 
-        self.inspector_image_name = tk.Label(self.inspector,text='名前')
-        self.inspector_image_name.place(x=0,y=5)
+        inspector_image_name = tk.Label(self.inspector,text='名前')
+        inspector_image_name.place(x=0,y=5)
         self.inspector_image_name_entry = tk.Entry(self.inspector,width=33)
         self.inspector_image_name_entry.place(x=0,y=25)
+
+        inspector_image_name = tk.Label(self.inspector,text='座標')
+        inspector_image_name.place(x=0,y=45)
+
+        inspector_image_position_x = tk.Label(self.inspector,text='x',font=("", "15", ""))
+        inspector_image_position_x.place(x=0,y=63)
+        #entryを設定
+        sv = tk.StringVar()
+        self.inspector_image_position_x_entry = tk.Entry(self.inspector,width=13,textvariable=sv)
+        self.inspector_image_position_x_entry.place(x=20,y=68)
+        # %s は変更前文字列, %P は変更後文字列を引数で渡す
+        vcmd1 = (self.inspector_image_position_x_entry.register(self.validation), '%s', '%P')
+        #Validationコマンドを設定（'key'は文字が入力される毎にイベント発火）
+        self.inspector_image_position_x_entry.configure(validate='key', vcmd=vcmd1)
+
+        inspector_image_position_x = tk.Label(self.inspector,text='y',font=("", "15", ""))
+        inspector_image_position_x.place(x=110,y=63)
+        #entryを設定
+        sv = tk.StringVar()
+        self.inspector_image_position_y_entry = tk.Entry(self.inspector,width=13,textvariable=sv)
+        self.inspector_image_position_y_entry.place(x=130,y=68)
+        # %s は変更前文字列, %P は変更後文字列を引数で渡す
+        vcmd2 = (self.inspector_image_position_y_entry.register(self.validation), '%s', '%P')
+        #Validationコマンドを設定（'key'は文字が入力される毎にイベント発火）
+        self.inspector_image_position_y_entry.configure(validate='key', vcmd=vcmd2)
 
         self.inspector_button = tk.Button(self.inspector,text='反映する',command=self.apply_input_information)
         self.inspector_button.place(x=75,y=360)

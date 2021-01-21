@@ -14,9 +14,15 @@ class MyImage():
         self.name = None
 
     #画像の座標を取得
+    #戻り値はキャンバス内の座標
     def get_position(self,canvas):
         return canvas.coords(self.item_id)
     
+    #画像を特定の座標に移動させる
+    #引数はキャンバス内の座標
+    def set_position(self,canvas,position_x,position_y):
+        canvas.coords(self.item_id,position_x,position_y)
+
     #画像を読み込む
     def load_image(self,canvas,file):
         self.file_name = file
