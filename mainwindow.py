@@ -49,6 +49,16 @@ class Application(tk.Frame):
 
         #セレクトしている画像
         self.number_image = None
+    def reflect_information_inspector_window(self):
+        #インスペクターウィンドウに情報を反映させる
+        self.inspector_image_name_entry.delete(0, tk.END)
+        self.inspector_image_name_entry.insert(tk.END,self.myimage_list[self.item_id].name)
+
+        self.inspector_image_position_x_entry.delete(0, tk.END)
+        self.inspector_image_position_y_entry.delete(0, tk.END)
+        position = self.myimage_list[self.item_id].get_position(self.canvas)
+        self.inspector_image_position_x_entry.insert(tk.END,position[0]-constant.ADD_CANVAS_SIZE)
+        self.inspector_image_position_y_entry.insert(tk.END,position[1]-constant.ADD_CANVAS_SIZE)
 
     def select_image(self):
         try:
@@ -78,14 +88,7 @@ class Application(tk.Frame):
         self.canvas.tag_raise(self.item_id)
 
         #インスペクターウィンドウに情報を反映させる
-        self.inspector_image_name_entry.delete(0, tk.END)
-        self.inspector_image_name_entry.insert(tk.END,self.myimage_list[self.item_id].name)
-
-        self.inspector_image_position_x_entry.delete(0, tk.END)
-        self.inspector_image_position_y_entry.delete(0, tk.END)
-        position = self.myimage_list[self.item_id].get_position(self.canvas)
-        self.inspector_image_position_x_entry.insert(tk.END,position[0]-constant.ADD_CANVAS_SIZE)
-        self.inspector_image_position_y_entry.insert(tk.END,position[1]-constant.ADD_CANVAS_SIZE)
+        self.reflect_information_inspector_window()
 
 
     def select_listbox(self,event):
@@ -152,11 +155,8 @@ class Application(tk.Frame):
         self.pressed_x = event.x
         self.pressed_y = event.y
 
-        self.inspector_image_position_x_entry.delete(0, tk.END)
-        self.inspector_image_position_y_entry.delete(0, tk.END)
-        position = self.myimage_list[self.item_id].get_position(self.canvas)
-        self.inspector_image_position_x_entry.insert(tk.END,position[0]-constant.ADD_CANVAS_SIZE)
-        self.inspector_image_position_y_entry.insert(tk.END,position[1]-constant.ADD_CANVAS_SIZE)
+        #インスペクターウィンドウに情報を反映させる
+        self.reflect_information_inspector_window()
 
     #ファイル読み込みが選択されたときの処理
     def load_image(self,fn=None,image_name=None,list_number=None):
@@ -209,7 +209,7 @@ class Application(tk.Frame):
         with open(fn,'wb') as file:
             for i in self.myimage_list:
                 #画像の名前を書き出す
-                file.write(bytes((str(self.myimage_list[i].file_name) + ' ').encode()))
+                file.write(bytes((str(self.myimage_list[i].name) + ' ').encode()))
                 #画像の座標を取得
                 x,y = self.myimage_list[i].get_position(self.canvas)
                 #画像の座標を書き出す
