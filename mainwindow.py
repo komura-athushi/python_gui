@@ -66,9 +66,10 @@ class Application(tk.Frame):
         self.inspector_image_position_y_entry.insert(tk.END,position[1]-constant.ADD_CANVAS_SIZE)
 
         #ピクセル数
-        pixel_size = myimg.image_size
-        self.inspector_pixel_size_x_text.set('X : '+str(pixel_size[0]))
-        self.inspector_pixel_size_y_text.set('Y : '+str(pixel_size[1]))
+        width=myimg.get_width()
+        height=myimg.get_height()
+        self.inspector_pixel_size_x_text.set('X : '+str(width))
+        self.inspector_pixel_size_y_text.set('Y : '+str(height))
 
         #スケール
         self.inspector_image_scale_x_entry.delete(0, tk.END)
