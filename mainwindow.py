@@ -497,8 +497,8 @@ class Application(tk.Frame):
 
 
 
-        self.inspector_button = tk.Button(self.inspector,text='反映する',command=self.apply_input_information,fg='red')
-        self.inspector_button.place(x=80,y=360)
+        self.inspector_button = tk.Button(self.inspector,text='入力項目を反映させる',command=self.apply_input_information,fg='red')
+        self.inspector_button.place(x=40,y=360)
     
     #プロジェクトウィンドウ？の初期化
     def init_project(self):
