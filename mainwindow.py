@@ -75,8 +75,11 @@ class Application(tk.Frame):
         self.inspector_image_scale_y_entry.delete(0, tk.END)
         scale=myimg.scale
         self.inspector_image_scale_x_entry.insert(tk.END,scale[0])
-        self.inspector_image_scale_y_entry.insert(tk.END,scale[0])
+        self.inspector_image_scale_y_entry.insert(tk.END,scale[1])
 
+       
+
+    #画像が選択されたときの処理
     def select_image(self):
         try:
         #画像の座標を持ってくる
@@ -84,8 +87,9 @@ class Application(tk.Frame):
             #画像の座標と大きさを取得する
             image_position_x = self.image_position[0]
             image_position_y = self.image_position[1]
-            image_size_x = self.myimage_list[self.item_id].image_size[0]
-            image_size_y = self.myimage_list[self.item_id].image_size[1]
+
+            image_size_x = self.myimage_list[self.item_id].get_width()
+            image_size_y = self.myimage_list[self.item_id].get_height()
         except:
             return
         
@@ -189,10 +193,10 @@ class Application(tk.Frame):
             fn=original_myimg.file_name
         #画像読み込み
         myimg = myimage.MyImage()
-        myimg.load_image(self.canvas,fn)
-        #複製した画像に複製元の画像の情報をコピーする
+         #複製した画像に複製元の画像の情報をコピーする
         if original_myimg != None:
-            original_myimg.copy_image_infromation(self.canvas,myimg)
+            myimg.copy_image_infromation(self.canvas,original_myimg)
+        myimg.load_image(self.canvas,fn)
         #リストに追加
         self.myimage_list[myimg.item_id] = myimg
         #リストボックスに名前を追加
@@ -309,9 +313,16 @@ class Application(tk.Frame):
         self.myimage_list[self.item_id].set_position(self.canvas,
         float(self.inspector_image_position_x_entry.get())+constant.ADD_CANVAS_SIZE,
         float(self.inspector_image_position_y_entry.get())+constant.ADD_CANVAS_SIZE)
+        self.myimage_list[self.item_id].scale=[float(self.inspector_image_scale_x_entry.get()),
+        float(self.inspector_image_scale_y_entry.get())]
         #リストボックスを選択
         self.project_list.select_set(self.number_image)
         self.select_image()
+        myimg = self.myimage_list[self.item_id]
+        #リサイズするために一旦消してもう一回読み込む
+        self.delete_image()
+        self.load_image(myimg)
+        
 
     #今は使ってない
     #使うときが来るかもしれない
