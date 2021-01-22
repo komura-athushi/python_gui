@@ -12,12 +12,14 @@ class MyImage():
         self.tkimg = None
         self.file_name = None
         self.name = None
+        self.scale= [1,1]
 
     #自身の情報を相手にコピーする
     def copy_image_infromation(self,canvas,opp):
         opp.name = self.name
         position=self.get_position(canvas)
         opp.set_position(canvas,position[0],position[1])
+        opp.scale=self.scale
 
 
     #画像の座標を取得

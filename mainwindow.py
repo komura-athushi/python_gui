@@ -69,8 +69,13 @@ class Application(tk.Frame):
         pixel_size = myimg.image_size
         self.inspector_pixel_size_x_text.set('X : '+str(pixel_size[0]))
         self.inspector_pixel_size_y_text.set('Y : '+str(pixel_size[1]))
-        #self.inspector_pixel_size_x.text = 'x : '+myimg.pixel_size[0]
-        #self.inspector_pixel_size_y.text = 'x : '+myimg.pixel_size[0]
+
+        #スケール
+        self.inspector_image_scale_x_entry.delete(0, tk.END)
+        self.inspector_image_scale_y_entry.delete(0, tk.END)
+        scale=myimg.scale
+        self.inspector_image_scale_x_entry.insert(tk.END,scale[0])
+        self.inspector_image_scale_y_entry.insert(tk.END,scale[0])
 
     def select_image(self):
         try:
@@ -150,9 +155,9 @@ class Application(tk.Frame):
         #クリックした場所とドラッグした場所の差分を計算
         delta_x = event.x - self.pressed_x
         delta_y = event.y - self.pressed_y
-        x, y = self.canvas.coords(self.item_id)
+        num = self.canvas.coords(self.item_id)
         #画像を動かす
-        self.canvas.coords(self.item_id, x+delta_x, y+delta_y)
+        self.canvas.coords(self.item_id, num[0]+delta_x, num[1]+delta_y)
         #枠の座標を取得して
         rect_0x, rect_0y, rect_1x, rect_1y = self.canvas.coords(self.rect)
         #枠を動かす
@@ -373,60 +378,107 @@ class Application(tk.Frame):
         self.label = tk.Label(self.master,text='x : y :')
         self.label.place(relx=constant.LABEL_RELX, rely=constant.LABEL_RELY)
 
+    #インスペクターウィンドウの名前のラベルを初期化する
+    def init_inspector_name_label(self):
+        #名前
+        inspector_image_name = tk.Label(self.inspector,text='名前')
+        inspector_image_name.place(x=constant.INSPECTOR_STANDARS_POSITION_X,y=constant.INSPECTOR_NAME_Y)
+        self.inspector_image_name_entry = tk.Entry(self.inspector,width=constant.INSPECTOR_NAME_ENTRY_SIZE_X)
+        self.inspector_image_name_entry.place(x=constant.INSPECTOR_STANDARS_POSITION_X,y=constant.INSPECTOR_NAME_ENTRY_Y)
 
+
+    #インスペクターウィンドウの座標のラベルを初期化する
     def init_inspector_position_label(self):
         inspector_image_name = tk.Label(self.inspector,text='座標')
-        inspector_image_name.place(x=0,y=45)
+        inspector_image_name.place(x=constant.INSPECTOR_STANDARS_POSITION_X,y=constant.INSPECTOR_POSITION_Y)
 
+        #X
         inspector_image_position_x = tk.Label(self.inspector,text='x',font=("", "15", ""))
-        inspector_image_position_x.place(x=0,y=63)
+        inspector_image_position_x.place(x=constant.INSPECTOR_STANDARS_POSITION_X,y=constant.INSPECTOR_POSITION_XY_Y)
         #entryを設定
         sv = tk.StringVar()
-        self.inspector_image_position_x_entry = tk.Entry(self.inspector,width=13,textvariable=sv)
-        self.inspector_image_position_x_entry.place(x=20,y=68)
+        self.inspector_image_position_x_entry = tk.Entry(self.inspector,width=constant.INSPECTOR_POSITION_ENTRY_SIZE_X,textvariable=sv)
+        self.inspector_image_position_x_entry.place(x=constant.INSPECTOR_POSITION_X_ENTRY_X,y=constant.INSPECTOR_POSITION_ENTRY_Y)
         # %s は変更前文字列, %P は変更後文字列を引数で渡す
         vcmd1 = (self.inspector_image_position_x_entry.register(self.validation), '%s', '%P')
         #Validationコマンドを設定（'key'は文字が入力される毎にイベント発火）
         self.inspector_image_position_x_entry.configure(validate='key', vcmd=vcmd1)
 
-        inspector_image_position_x = tk.Label(self.inspector,text='y',font=("", "15", ""))
-        inspector_image_position_x.place(x=110,y=63)
+        #y
+        inspector_image_position_y = tk.Label(self.inspector,text='y',font=("", "15", ""))
+        inspector_image_position_y.place(x=constant.INSPECTOR_POSITION_Y_X,y=constant.INSPECTOR_POSITION_XY_Y)
         #entryを設定
         sv = tk.StringVar()
-        self.inspector_image_position_y_entry = tk.Entry(self.inspector,width=13,textvariable=sv)
-        self.inspector_image_position_y_entry.place(x=130,y=68)
+        self.inspector_image_position_y_entry = tk.Entry(self.inspector,width=constant.INSPECTOR_POSITION_ENTRY_SIZE_X,textvariable=sv)
+        self.inspector_image_position_y_entry.place(x=constant.INSPECTOR_POSITION_Y_ENTRY_X,y=constant.INSPECTOR_POSITION_ENTRY_Y)
         # %s は変更前文字列, %P は変更後文字列を引数で渡す
         vcmd2 = (self.inspector_image_position_y_entry.register(self.validation), '%s', '%P')
         #Validationコマンドを設定（'key'は文字が入力される毎にイベント発火）
         self.inspector_image_position_y_entry.configure(validate='key', vcmd=vcmd2)
 
+    #インスペクターウィンドウのスケールのラベルを初期化する
+    def init_inspector_scale_label(self):
+        inspector_image_scale = tk.Label(self.inspector,text='スケール')
+        inspector_image_scale.place(x=constant.INSPECTOR_STANDARS_POSITION_X,y=constant.INSPECTOR_SCALE_Y)
+
+        #X
+        inspector_image_scale_x = tk.Label(self.inspector,text='x',font=("", "15", ""))
+        inspector_image_scale_x.place(x=constant.INSPECTOR_STANDARS_POSITION_X,y=constant.INSPECTOR_SCALE_XY_Y)
+        #entryを設定
+        sv = tk.StringVar()
+        self.inspector_image_scale_x_entry = tk.Entry(self.inspector,width=constant.INSPECTOR_SCALE_ENTRY_SIZE_X,textvariable=sv)
+        self.inspector_image_scale_x_entry.place(x=constant.INSPECTOR_SCALE_X_ENTRY_X,y=constant.INSPECTOR_SCALE_ENTRY_Y)
+        # %s は変更前文字列, %P は変更後文字列を引数で渡す
+        vcmd1 = (self.inspector_image_scale_x_entry.register(self.validation), '%s', '%P')
+        #Validationコマンドを設定（'key'は文字が入力される毎にイベント発火）
+        self.inspector_image_scale_x_entry.configure(validate='key', vcmd=vcmd1)
+
+        #y
+        inspector_image_scale_y = tk.Label(self.inspector,text='y',font=("", "15", ""))
+        inspector_image_scale_y.place(x=constant.INSPECTOR_SCALE_Y_X,y=constant.INSPECTOR_SCALE_XY_Y)
+        #entryを設定
+        sv = tk.StringVar()
+        self.inspector_image_scale_y_entry = tk.Entry(self.inspector,width=constant.INSPECTOR_SCALE_ENTRY_SIZE_X,textvariable=sv)
+        self.inspector_image_scale_y_entry.place(x=constant.INSPECTOR_SCALE_Y_ENTRY_X,y=constant.INSPECTOR_SCALE_ENTRY_Y)
+        # %s は変更前文字列, %P は変更後文字列を引数で渡す
+        vcmd2 = (self.inspector_image_scale_y_entry.register(self.validation), '%s', '%P')
+        #Validationコマンドを設定（'key'は文字が入力される毎にイベント発火）
+        self.inspector_image_scale_y_entry.configure(validate='key', vcmd=vcmd2)
+
+
+    #インスペクターウィンドウのピクセルのラベルを初期化する
     def init_inspector_pixel_label(self):
         inspector_pixel_size = tk.Label(self.inspector,text='ピクセル')
-        inspector_pixel_size.place(x=0,y=95)
+        inspector_pixel_size.place(x=constant.INSPECTOR_STANDARS_POSITION_X,y=constant.INSPECTOR_PIXEL_Y)
         self.inspector_pixel_size_x_text = tk.StringVar()
         self.inspector_pixel_size_x_text.set('X : ')
         self.inspector_pixel_size_x = tk.Label(self.inspector,textvariable=self.inspector_pixel_size_x_text,font=('','10'))
-        self.inspector_pixel_size_x.place(x=0,y=115)
+        self.inspector_pixel_size_x.place(x=constant.INSPECTOR_STANDARS_POSITION_X,y=constant.INSPECTPR_PIXEL_XY_Y)
         self.inspector_pixel_size_y_text = tk.StringVar()
         self.inspector_pixel_size_y_text.set('Y : ')
         self.inspector_pixel_size_y = tk.Label(self.inspector,textvariable=self.inspector_pixel_size_y_text,font=('','10'))
-        self.inspector_pixel_size_y.place(x=80,y=115)
+        self.inspector_pixel_size_y.place(x=constant.INSPECTPR_PIXEL_Y_X,y=constant.INSPECTPR_PIXEL_XY_Y)
 
     #インスペクターウィンドウ？の初期化
     def init_inspector(self):
         #ラベル配置
-        self.inspector = tk.Frame(self.master,width=200,height=400)
+        self.inspector = tk.Frame(self.master,width=constant.INSPECTOR_WIDTH,height=constant.INSPECTOR_HEIGHT)
         #self.inspector['bg'] = 'white'
         self.inspector.place(relx=constant.INSPECTOR_RELX,rely=constant.INSPECTOR_RELY)
 
-        inspector_image_name = tk.Label(self.inspector,text='名前')
-        inspector_image_name.place(x=0,y=5)
-        self.inspector_image_name_entry = tk.Entry(self.inspector,width=33)
-        self.inspector_image_name_entry.place(x=0,y=25)
-
+        #名前項目の初期化
+        self.init_inspector_name_label()
+        
+        #座標項目の初期化
         self.init_inspector_position_label()
 
+        #スケール項目の初期化
+        self.init_inspector_scale_label()
+
+        #ピクセル項目の初期化
         self.init_inspector_pixel_label()
+
+
 
         self.inspector_button = tk.Button(self.inspector,text='反映する',command=self.apply_input_information)
         self.inspector_button.place(x=100,y=360)
