@@ -13,6 +13,13 @@ class MyImage():
         self.file_name = None
         self.name = None
 
+    #自身の情報を相手にコピーする
+    def copy_image_infromation(self,canvas,opp):
+        opp.name = self.name
+        position=self.get_position(canvas)
+        opp.set_position(canvas,position[0],position[1])
+
+
     #画像の座標を取得
     #戻り値はキャンバス内の座標
     def get_position(self,canvas):

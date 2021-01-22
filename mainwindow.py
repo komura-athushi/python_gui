@@ -49,16 +49,28 @@ class Application(tk.Frame):
 
         #セレクトしている画像
         self.number_image = None
-    def reflect_information_inspector_window(self):
-        #インスペクターウィンドウに情報を反映させる
-        self.inspector_image_name_entry.delete(0, tk.END)
-        self.inspector_image_name_entry.insert(tk.END,self.myimage_list[self.item_id].name)
 
+    #画像の情報をインスペクターウィンドウに反映させる
+    def reflect_information_inspector_window(self):
+        myimg = self.myimage_list[self.item_id]
+        #インスペクターウィンドウに情報を反映させる
+        #名前
+        self.inspector_image_name_entry.delete(0, tk.END)
+        self.inspector_image_name_entry.insert(tk.END,myimg.name)
+
+        #座標
         self.inspector_image_position_x_entry.delete(0, tk.END)
         self.inspector_image_position_y_entry.delete(0, tk.END)
-        position = self.myimage_list[self.item_id].get_position(self.canvas)
+        position = myimg.get_position(self.canvas)
         self.inspector_image_position_x_entry.insert(tk.END,position[0]-constant.ADD_CANVAS_SIZE)
         self.inspector_image_position_y_entry.insert(tk.END,position[1]-constant.ADD_CANVAS_SIZE)
+
+        #ピクセル数
+        pixel_size = myimg.image_size
+        self.inspector_pixel_size_x_text.set('X : '+str(pixel_size[0]))
+        self.inspector_pixel_size_y_text.set('Y : '+str(pixel_size[1]))
+        #self.inspector_pixel_size_x.text = 'x : '+myimg.pixel_size[0]
+        #self.inspector_pixel_size_y.text = 'x : '+myimg.pixel_size[0]
 
     def select_image(self):
         try:
@@ -159,37 +171,36 @@ class Application(tk.Frame):
         self.reflect_information_inspector_window()
 
     #ファイル読み込みが選択されたときの処理
-    def load_image(self,fn=None,image_name=None,list_number=None):
+    def load_image(self,original_myimg=None):
         
-        if fn == None:
+        fn = None
+        if original_myimg == None:
             #読み込むファイルの拡張子を指定
             typ = [('png画像','*.png'),
                 ('jpg画像','*.jpg')]
             #ファイル選択ダイアログを表示
             fn = filedialog.askopenfilename(filetypes=typ)
+        else:
+            fn=original_myimg.file_name
         #画像読み込み
         myimg = myimage.MyImage()
         myimg.load_image(self.canvas,fn)
-        if image_name != None:
-            myimg.name = image_name
+        #複製した画像に複製元の画像の情報をコピーする
+        if original_myimg != None:
+            original_myimg.copy_image_infromation(self.canvas,myimg)
+        #リストに追加
         self.myimage_list[myimg.item_id] = myimg
         #リストボックスに名前を追加
-        if list_number == None:
-            self.project_list.insert(tk.END, myimg.name)
-        else:
-            self.project_list.insert(list_number, myimg.name)
+        self.project_list.insert(tk.END, myimg.name) 
         #レクタングルを設定して、リストボックスも選択する
         self.item_id = myimg.item_id
         self.select_image()
         self.project_list.selection_clear(0, tk.END)
         number = 0
-        if list_number == None:
-            for i in self.myimage_list:
-                if self.item_id == self.myimage_list[i].item_id:
-                    break
-                number+=1
-        else:
-            number = list_number+1
+        for i in self.myimage_list:
+            if self.item_id == self.myimage_list[i].item_id:
+                break
+            number+=1
         #リストボックスを選択
         self.project_list.select_set(number)
         self.number_image = number
@@ -237,15 +248,13 @@ class Application(tk.Frame):
         if len(number) == 0:
             return
         number2 = 0
-        fn = None
-        image_name = None
+        myimg = None
         for i in self.myimage_list:
             if number[0] == number2:
-                fn = self.myimage_list[i].file_name
-                image_name = self.myimage_list[i].name
+                myimg = self.myimage_list[i]
                 break
             number2+=1
-        self.load_image(fn,image_name)
+        self.load_image(myimg)
         
     #画像を削除する
     def delete_image(self):
@@ -364,18 +373,8 @@ class Application(tk.Frame):
         self.label = tk.Label(self.master,text='x : y :')
         self.label.place(relx=constant.LABEL_RELX, rely=constant.LABEL_RELY)
 
-    #インスペクターウィンドウ？の初期化
-    def init_inspector(self):
-        #ラベル配置
-        self.inspector = tk.Frame(self.master,width=200,height=400)
-        #self.inspector['bg'] = 'white'
-        self.inspector.place(relx=constant.INSPECTOR_RELX,rely=constant.INSPECTOR_RELY)
 
-        inspector_image_name = tk.Label(self.inspector,text='名前')
-        inspector_image_name.place(x=0,y=5)
-        self.inspector_image_name_entry = tk.Entry(self.inspector,width=33)
-        self.inspector_image_name_entry.place(x=0,y=25)
-
+    def init_inspector_position_label(self):
         inspector_image_name = tk.Label(self.inspector,text='座標')
         inspector_image_name.place(x=0,y=45)
 
@@ -401,8 +400,36 @@ class Application(tk.Frame):
         #Validationコマンドを設定（'key'は文字が入力される毎にイベント発火）
         self.inspector_image_position_y_entry.configure(validate='key', vcmd=vcmd2)
 
+    def init_inspector_pixel_label(self):
+        inspector_pixel_size = tk.Label(self.inspector,text='ピクセル')
+        inspector_pixel_size.place(x=0,y=95)
+        self.inspector_pixel_size_x_text = tk.StringVar()
+        self.inspector_pixel_size_x_text.set('X : ')
+        self.inspector_pixel_size_x = tk.Label(self.inspector,textvariable=self.inspector_pixel_size_x_text,font=('','10'))
+        self.inspector_pixel_size_x.place(x=0,y=115)
+        self.inspector_pixel_size_y_text = tk.StringVar()
+        self.inspector_pixel_size_y_text.set('Y : ')
+        self.inspector_pixel_size_y = tk.Label(self.inspector,textvariable=self.inspector_pixel_size_y_text,font=('','10'))
+        self.inspector_pixel_size_y.place(x=80,y=115)
+
+    #インスペクターウィンドウ？の初期化
+    def init_inspector(self):
+        #ラベル配置
+        self.inspector = tk.Frame(self.master,width=200,height=400)
+        #self.inspector['bg'] = 'white'
+        self.inspector.place(relx=constant.INSPECTOR_RELX,rely=constant.INSPECTOR_RELY)
+
+        inspector_image_name = tk.Label(self.inspector,text='名前')
+        inspector_image_name.place(x=0,y=5)
+        self.inspector_image_name_entry = tk.Entry(self.inspector,width=33)
+        self.inspector_image_name_entry.place(x=0,y=25)
+
+        self.init_inspector_position_label()
+
+        self.init_inspector_pixel_label()
+
         self.inspector_button = tk.Button(self.inspector,text='反映する',command=self.apply_input_information)
-        self.inspector_button.place(x=75,y=360)
+        self.inspector_button.place(x=100,y=360)
     
     #プロジェクトウィンドウ？の初期化
     def init_project(self):
