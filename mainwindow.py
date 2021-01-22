@@ -229,13 +229,18 @@ class Application(tk.Frame):
         #ファイルをオープンする、withでcloseをしなくていいらしい
         with open(fn,'wb') as file:
             for i in self.myimage_list:
+                myimg=self.myimage_list[i]
                 #画像の名前を書き出す
-                file.write(bytes((str(self.myimage_list[i].name) + ' ').encode()))
+                file.write(bytes((str(myimg.name) + ' ').encode()))
                 #画像の座標を取得
-                x,y = self.myimage_list[i].get_position(self.canvas)
+                x,y = myimg.get_position()
                 #画像の座標を書き出す
                 file.write(bytes((str(x-constant.ADD_CANVAS_SIZE) + ' ').encode()))
                 file.write(bytes((str(y-constant.ADD_CANVAS_SIZE) + ' ').encode()))
+                scale=myimg.scale
+                #画像のスケールを書き出す
+                file.write(bytes((str(scale[0]) + ' ').encode()))
+                file.write(bytes((str(scale[1]) + ' ').encode()))
                 file.write(bytes('\n'.encode()))
         
         messagebox.showinfo('メッセージ', '書き出しに成功しました！')
@@ -492,8 +497,8 @@ class Application(tk.Frame):
 
 
 
-        self.inspector_button = tk.Button(self.inspector,text='反映する',command=self.apply_input_information)
-        self.inspector_button.place(x=100,y=360)
+        self.inspector_button = tk.Button(self.inspector,text='反映する',command=self.apply_input_information,fg='red')
+        self.inspector_button.place(x=80,y=360)
     
     #プロジェクトウィンドウ？の初期化
     def init_project(self):
