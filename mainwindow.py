@@ -61,7 +61,7 @@ class Application(tk.Frame):
         #座標
         self.inspector_image_position_x_entry.delete(0, tk.END)
         self.inspector_image_position_y_entry.delete(0, tk.END)
-        position = myimg.get_position(self.canvas)
+        position = myimg.get_position()
         self.inspector_image_position_x_entry.insert(tk.END,position[0]-constant.ADD_CANVAS_SIZE)
         self.inspector_image_position_y_entry.insert(tk.END,position[1]-constant.ADD_CANVAS_SIZE)
 
@@ -80,7 +80,7 @@ class Application(tk.Frame):
     def select_image(self):
         try:
         #画像の座標を持ってくる
-            self.image_position = self.canvas.coords(self.item_id)
+            self.image_position = self.myimage_list[self.item_id].get_position()
             #画像の座標と大きさを取得する
             image_position_x = self.image_position[0]
             image_position_y = self.image_position[1]
@@ -149,15 +149,15 @@ class Application(tk.Frame):
         #画像を動かす処理をしない
         if self.rect == None:
             return
-        self.item_id = self.canvas.find_closest(event.x, event.y)[0]
         #tag = self.canvas.gettags(self.item_id[0])[0]
         #item = self.canvas.type(tag) # rectangle image
         #クリックした場所とドラッグした場所の差分を計算
         delta_x = event.x - self.pressed_x
         delta_y = event.y - self.pressed_y
-        num = self.canvas.coords(self.item_id)
+        img = self.myimage_list[self.item_id]
+        position = img.get_position()
         #画像を動かす
-        self.canvas.coords(self.item_id, num[0]+delta_x, num[1]+delta_y)
+        img.set_position(self.canvas,position[0]+delta_x,position[1]+delta_y)
         #枠の座標を取得して
         rect_0x, rect_0y, rect_1x, rect_1y = self.canvas.coords(self.rect)
         #枠を動かす

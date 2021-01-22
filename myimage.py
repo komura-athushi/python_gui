@@ -13,38 +13,45 @@ class MyImage():
         self.file_name = None
         self.name = None
         self.scale= [1,1]
+        self.position = [0,0]
+
+        self.img = None
+        self.tkimg = None
 
     #自身の情報を相手にコピーする
     def copy_image_infromation(self,canvas,opp):
         opp.name = self.name
-        position=self.get_position(canvas)
+        position=self.get_position()
         opp.set_position(canvas,position[0],position[1])
         opp.scale=self.scale
 
-
     #画像の座標を取得
     #戻り値はキャンバス内の座標
-    def get_position(self,canvas):
-        return canvas.coords(self.item_id)
+    def get_position(self):
+        return self.position
     
     #画像を特定の座標に移動させる
     #引数はキャンバス内の座標
     def set_position(self,canvas,position_x,position_y):
         canvas.coords(self.item_id,position_x,position_y)
+        self.position=[position_x,position_y]
 
     #画像を読み込む
     def load_image(self,canvas,file):
         self.file_name = file
         #画像読み込み
-        img = Image.open(file)
+        self.img = Image.open(file)
+        #画像のサイズを取得
+        self.image_size = self.img.size
+        #self.img = self.img.resize((int(self.image_size[0]/2),self.image_size[1]))
         #このImageTk?は保持しておかないといけないらしい
-        self.tkimg = ImageTk.PhotoImage(img)
+        self.position = [constant.CANVAS_WIDTH/2 + constant.ADD_CANVAS_SIZE,constant.CANVAS_HEIGHT/2 + constant.ADD_CANVAS_SIZE]
+        self.tkimg = ImageTk.PhotoImage(self.img)
         self.item_id = canvas.create_image(constant.CANVAS_WIDTH/2 + constant.ADD_CANVAS_SIZE,
         constant.CANVAS_HEIGHT/2 + constant.ADD_CANVAS_SIZE,
         image=self.tkimg,
         tags='img')
-        #画像のサイズを取得
-        self.image_size = img.size
+        
         #ファイルの名前を抽出していく、/と.を除いていく
         slash_number = file.rfind('/')
         number = file.rfind('.')
