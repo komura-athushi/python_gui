@@ -158,20 +158,20 @@ class Application(tk.Frame):
     def change_scale(self,delta_x,delta_y):
         if self.is_pressd_image == False:
             return
-        print(1)
         try:
             myimg = self.myimage_list[self.item_id]
-            #リサイズした後の大きさ
+            #今の画像の大きさ
             width = myimg.width
             height=myimg.height
-            #リサイズする前の大きさ
+            #画像の素の大きさ
             image_size=myimg.image_size
 
-            change_width = width + delta_x
-            change_height = height + delta_y
+            #リサイズ予定の大きさ
+            width += delta_x*2
+            height -= delta_y*2
 
-            myimg.scale[0] = change_width / image_size[0]
-            myimg.scale[1] = change_height / image_size[1]
+            myimg.scale[0] = width / image_size[0]
+            myimg.scale[1] = height / image_size[1]
             #リサイズするために一旦消してもう一回読み込む
             self.delete_image()
             self.load_image(myimg)
