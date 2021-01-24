@@ -50,8 +50,12 @@ class Application(tk.Frame):
         #セレクトしている画像
         self.number_image = None
 
+        self.is_pressd_image = False
+
     #画像の情報をインスペクターウィンドウに反映させる
     def reflect_information_inspector_window(self):
+        if self.item_id == None:
+            return
         myimg = self.myimage_list[self.item_id]
         #インスペクターウィンドウに情報を反映させる
         #名前
@@ -147,18 +151,37 @@ class Application(tk.Frame):
         #リストボックスを選択
         self.project_list.select_set(number)
         self.number_image = number
+        self.is_pressd_image = True
     
-    #画像がドラッグされたときの処理
-    def dragged(self,event):
-        #枠が表示されていなかったら、
-        #画像を動かす処理をしない
-        if self.rect == None:
+    #スケールを変化させる
+    #delta_xとdelta_yはマウスの移動量
+    def change_scale(self,delta_x,delta_y):
+        if self.is_pressd_image == False:
             return
-        #tag = self.canvas.gettags(self.item_id[0])[0]
-        #item = self.canvas.type(tag) # rectangle image
-        #クリックした場所とドラッグした場所の差分を計算
-        delta_x = event.x - self.pressed_x
-        delta_y = event.y - self.pressed_y
+        print(1)
+        try:
+            myimg = self.myimage_list[self.item_id]
+            #リサイズした後の大きさ
+            width = myimg.width
+            height=myimg.height
+            #リサイズする前の大きさ
+            image_size=myimg.image_size
+
+            change_width = width + delta_x
+            change_height = height + delta_y
+
+            myimg.scale[0] = change_width / image_size[0]
+            myimg.scale[1] = change_height / image_size[1]
+            #リサイズするために一旦消してもう一回読み込む
+            self.delete_image()
+            self.load_image(myimg)
+        except:
+            a=0
+        
+
+    #座標を変化させる
+    #delta_xとdelta_yはマウスの移動量
+    def change_position(self,delta_x,delta_y):
         img = self.myimage_list[self.item_id]
         position = img.get_position()
         #画像を動かす
@@ -174,11 +197,29 @@ class Application(tk.Frame):
         rect_1x+delta_x,
         rect_1y+delta_y
         )
+
+    #画像がドラッグされたときの処理
+    def dragged(self,event):
+        #枠が表示されていなかったら、
+        #画像を動かす処理をしない
+        if self.rect == None:
+            return
+        #tag = self.canvas.gettags(self.item_id[0])[0]
+        #item = self.canvas.type(tag) # rectangle image
+        #クリックした場所とドラッグした場所の差分を計算
+        delta_x = event.x - self.pressed_x
+        delta_y = event.y - self.pressed_y
+        #self.change_position(delta_x,delta_y)
+        self.change_scale(delta_x,delta_y)
         self.pressed_x = event.x
         self.pressed_y = event.y
 
         #インスペクターウィンドウに情報を反映させる
         self.reflect_information_inspector_window()
+
+    #右クリックが終わったとき
+    def mouse_release(self,event):
+        self.is_pressd_image = False
 
     #ファイル読み込みが選択されたときの処理
     def load_image(self,original_myimg=None):
@@ -357,9 +398,11 @@ class Application(tk.Frame):
 
         #関数をバインドする
         self.canvas.tag_bind('img', '<ButtonPress-1>', self.pressed)
-        self.canvas.tag_bind('img', '<B1-Motion>', self.dragged)
+        #self.canvas.tag_bind('img', '<B1-Motion>', self.dragged)
         #マウスの座標を表示したい
         self.canvas.bind('<Motion>', self.motion)
+        self.canvas.bind('<B1-Motion>', self.dragged)
+        self.canvas.bind('<ButtonRelease-1>', self.mouse_release)
         #720*1280の枠を作る
         self.canvas_rect = self.canvas.create_rectangle(
             constant.ADD_CANVAS_SIZE,
@@ -511,6 +554,7 @@ class Application(tk.Frame):
         self.project_list.bind('<<ListboxSelect>>', self.select_listbox)
         self.project.place(relx=constant.INSPECTOR_RELX,
         rely=constant.PROJECT_RELY)
+
 
         #フレームを親にスクロールバーを生成
         self.project_bar_y = tk.Scrollbar(self.project,orient=tk.VERTICAL,command=self.project_list.yview)
