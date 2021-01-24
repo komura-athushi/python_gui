@@ -54,6 +54,11 @@ class MyImage():
         #このImageTk?は保持しておかないといけないらしい
         self.tkimg = ImageTk.PhotoImage(self.img)
         
+    def set_scale(self,scale):
+        if scale[0] < 0.01 or scale[1] < 0.01:
+            return
+        self.scale=scale
+
     #画像のを取得する
     def get_width(self):
         return self.width

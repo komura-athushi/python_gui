@@ -167,17 +167,20 @@ class Application(tk.Frame):
             image_size=myimg.image_size
 
             #リサイズ予定の大きさ
+            #*2を忘れないように
             width += delta_x*2
             height -= delta_y*2
 
-            myimg.scale[0] = width / image_size[0]
-            myimg.scale[1] = height / image_size[1]
+            myimg.set_scale([width / image_size[0],
+            height / image_size[1]])
+
+            #myimg.scale[0] = width / image_size[0]
+            #myimg.scale[1] = height / image_size[1]
             #リサイズするために一旦消してもう一回読み込む
             self.delete_image()
             self.load_image(myimg)
         except:
-            a=0
-        
+            pass
 
     #座標を変化させる
     #delta_xとdelta_yはマウスの移動量
@@ -360,8 +363,8 @@ class Application(tk.Frame):
         self.myimage_list[self.item_id].set_position(self.canvas,
         float(self.inspector_image_position_x_entry.get())+constant.ADD_CANVAS_SIZE,
         float(self.inspector_image_position_y_entry.get())+constant.ADD_CANVAS_SIZE)
-        self.myimage_list[self.item_id].scale=[float(self.inspector_image_scale_x_entry.get()),
-        float(self.inspector_image_scale_y_entry.get())]
+        self.myimage_list[self.item_id].set_scale([float(self.inspector_image_scale_x_entry.get()),
+        float(self.inspector_image_scale_y_entry.get())])
         #リストボックスを選択
         self.project_list.select_set(self.number_image)
         self.select_image()
