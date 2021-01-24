@@ -7,6 +7,7 @@ import re
 
 import myimage
 import constant
+import myframe
 
 
 
@@ -31,8 +32,6 @@ class Application(tk.Frame):
         self.init_canvas()
         #色々初期化
         self.init_various()
-        #枠を初期化
-        self.init_rectangle()
         #メニューの初期化
         self.init_menu()
         #ラベルの初期化
@@ -86,30 +85,18 @@ class Application(tk.Frame):
 
     #画像が選択されたときの処理
     def select_image(self):
+        myimage = None
         try:
         #画像の座標を持ってくる
             self.image_position = self.myimage_list[self.item_id].get_position()
             #画像の座標と大きさを取得する
             image_position_x = self.image_position[0]
             image_position_y = self.image_position[1]
-
-            image_size_x = self.myimage_list[self.item_id].get_width()
-            image_size_y = self.myimage_list[self.item_id].get_height()
+            myimage = self.myimage_list[self.item_id]
         except:
             return
-        
-        #枠を削除する
-        self.canvas.delete(self.rect)
-        self.init_rectangle()        
-        #枠を生成する、引数の順番は、
-        #左上のx座標、左上のy座標
-        #右下のx座標、右下のy座標
-        self.rect = self.canvas.create_rectangle(
-        image_position_x - image_size_x / 2 - constant.ADD_FRAME_SIZE,
-        image_position_y + image_size_y / 2 + constant.ADD_FRAME_SIZE,
-        image_position_x + image_size_x / 2 + constant.ADD_FRAME_SIZE,
-        image_position_y - image_size_y / 2 - constant.ADD_FRAME_SIZE,
-        outline='red')
+        #枠を生成する
+        self.myframe.create_frame(self.canvas,image_position_x,image_position_y,myimage)
         #選択した画像を上に持ってくる
         self.canvas.tag_raise(self.item_id)
 
@@ -156,8 +143,6 @@ class Application(tk.Frame):
     #スケールを変化させる
     #delta_xとdelta_yはマウスの移動量
     def change_scale(self,delta_x,delta_y):
-        if self.is_pressd_image == False:
-            return
         try:
             myimg = self.myimage_list[self.item_id]
             #今の画像の大きさ
@@ -189,31 +174,26 @@ class Application(tk.Frame):
         position = img.get_position()
         #画像を動かす
         img.set_position(self.canvas,position[0]+delta_x,position[1]+delta_y)
-        #枠の座標を取得して
-        rect_0x, rect_0y, rect_1x, rect_1y = self.canvas.coords(self.rect)
-        #枠を動かす
-        #左上のx座標、左上のy座標
-        #右下のx座標、右下のy座標
-        self.canvas.coords(self.rect,
-        rect_0x+delta_x,
-        rect_0y+delta_y,
-        rect_1x+delta_x,
-        rect_1y+delta_y
-        )
+        image_position = img.get_position()
+        self.myframe.set_position(self.canvas,
+        image_position[0],
+        image_position[1],
+        img)
+        
 
     #画像がドラッグされたときの処理
     def dragged(self,event):
-        #枠が表示されていなかったら、
+        #枠が表示されていなかったら、あるいは画像が押されていなかったら
         #画像を動かす処理をしない
-        if self.rect == None:
+        if self.myframe.get_is_rect() == False or self.is_pressd_image == False:
             return
         #tag = self.canvas.gettags(self.item_id[0])[0]
         #item = self.canvas.type(tag) # rectangle image
         #クリックした場所とドラッグした場所の差分を計算
         delta_x = event.x - self.pressed_x
         delta_y = event.y - self.pressed_y
-        #self.change_position(delta_x,delta_y)
-        self.change_scale(delta_x,delta_y)
+        self.change_position(delta_x,delta_y)
+        #self.change_scale(delta_x,delta_y)
         self.pressed_x = event.x
         self.pressed_y = event.y
 
@@ -289,12 +269,6 @@ class Application(tk.Frame):
         
         messagebox.showinfo('メッセージ', '書き出しに成功しました！')
 
-    #枠を初期化
-    def init_rectangle(self):
-        self.rect_start_x = None
-        self.rect_start_y = None
-        self.rect = None
-
     #マウスが動いた時の処理
     def motion(self,event):
         #マウス座標を取得する
@@ -333,8 +307,7 @@ class Application(tk.Frame):
                 break
             number2+=1
         #枠を削除する
-        self.canvas.delete(self.rect)
-        self.init_rectangle()
+        self.myframe.delete_frame(self.canvas)
         self.item_id = None
         self.number_image = None
         
@@ -416,6 +389,8 @@ class Application(tk.Frame):
         #キャンバスの色をウィンドウの色と同じにする
         #self.canvas['bg'] = self.master['bg']
         self.canvas['bg'] = constant.CANVAS_COLOR
+
+        self.myframe = myframe.MyFrame()
         
 
     #色々初期化
