@@ -19,6 +19,7 @@ class MyImage():
         self.tkimg = None
         self.width=None
         self.height=None
+        self.tag = None
 
         self.is_copy = False
     #自身の情報を相手にコピーする
@@ -76,7 +77,7 @@ class MyImage():
         return self.height
 
     #画像を読み込む
-    def load_image(self,canvas,file):
+    def load_image(self,canvas,file,tag='img'):
         self.file_name = file
         #画像読み込み
         self.img = Image.open(file)
@@ -87,7 +88,8 @@ class MyImage():
         self.item_id = canvas.create_image(self.position[0],
         self.position[1],
         image=self.tkimg,
-        tags='img')
+        tags=tag)
+        self.tag = tag
         
         if self.is_copy==True:
             return

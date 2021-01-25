@@ -49,7 +49,10 @@ class Application(tk.Frame):
         #セレクトしている画像
         self.number_image = None
 
-        self.is_pressd_image = False
+        self.is_pressed_image = False
+
+        #画像の隅の四角が押された
+        self.is_pressed_rect = False
 
     #画像の情報をインスペクターウィンドウに反映させる
     def reflect_information_inspector_window(self):
@@ -94,6 +97,7 @@ class Application(tk.Frame):
             image_position_y = self.image_position[1]
             myimage = self.myimage_list[self.item_id]
         except:
+            print(11111)
             return
         #枠を生成する
         self.myframe.create_frame(self.canvas,image_position_x,image_position_y,myimage)
@@ -118,6 +122,12 @@ class Application(tk.Frame):
         self.select_image()
         self.number_image = number[0]
             
+    def pressed_rect(self,event):
+        #クリックした場所を保存
+        self.pressed_x = event.x
+        self.pressed_y = event.y
+        self.is_pressed_rect = True
+    
     #画像がクリックされたときの処理
     def pressed(self,event):
         #選択された画像を持ってくる
@@ -138,7 +148,7 @@ class Application(tk.Frame):
         #リストボックスを選択
         self.project_list.select_set(number)
         self.number_image = number
-        self.is_pressd_image = True
+        self.is_pressed_image = True
     
     #スケールを変化させる
     #delta_xとdelta_yはマウスの移動量
@@ -184,25 +194,30 @@ class Application(tk.Frame):
     #画像がドラッグされたときの処理
     def dragged(self,event):
         #枠が表示されていなかったら、あるいは画像が押されていなかったら
+        #あるいは画像の隅の四角形が押されていなかったら
         #画像を動かす処理をしない
-        if self.myframe.get_is_rect() == False or self.is_pressd_image == False:
+        if self.myframe.get_is_rect() == False or (self.is_pressed_image == False and self.is_pressed_rect == False):
             return
         #tag = self.canvas.gettags(self.item_id[0])[0]
         #item = self.canvas.type(tag) # rectangle image
         #クリックした場所とドラッグした場所の差分を計算
         delta_x = event.x - self.pressed_x
         delta_y = event.y - self.pressed_y
-        self.change_position(delta_x,delta_y)
-        #self.change_scale(delta_x,delta_y)
+        if self.is_pressed_rect == True:  
+            self.change_scale(delta_x,delta_y)
+        elif self.is_pressed_image == True:
+            self.change_position(delta_x,delta_y)
         self.pressed_x = event.x
         self.pressed_y = event.y
 
         #インスペクターウィンドウに情報を反映させる
         self.reflect_information_inspector_window()
 
-    #右クリックが終わったとき
+    #右クリックが終わったとき(ドラッグが終了したとき)
     def mouse_release(self,event):
-        self.is_pressd_image = False
+        #各フラグをオフにする
+        self.is_pressed_image = False
+        self.is_pressed_rect = False
 
     #ファイル読み込みが選択されたときの処理
     def load_image(self,original_myimg=None):
@@ -374,7 +389,7 @@ class Application(tk.Frame):
 
         #関数をバインドする
         self.canvas.tag_bind('img', '<ButtonPress-1>', self.pressed)
-        #self.canvas.tag_bind('img', '<B1-Motion>', self.dragged)
+        self.canvas.tag_bind(constant.MYFRAME_IMAGE_TAG, '<ButtonPress-1>', self.pressed_rect)
         #マウスの座標を表示したい
         self.canvas.bind('<Motion>', self.motion)
         self.canvas.bind('<B1-Motion>', self.dragged)

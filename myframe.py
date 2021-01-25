@@ -35,6 +35,7 @@ class MyFrame():
         self.color_move = 'red'
         self.color_scale = 'blue'
 
+
         self.is_move = False
 
     #座標を取得
@@ -59,8 +60,7 @@ class MyFrame():
         self.position2_x,
         self.position2_y,)
 
-        if self.is_move == False:
-            self.move_rect(canvas,position_x,position_y)
+        self.move_rect(canvas,position_x,position_y)
 
     def get_is_rect(self):
         return self.rect != None
@@ -71,22 +71,26 @@ class MyFrame():
 
             for i in self.rect_list:
                 self.rect_list[i].move_position(canvas,delta_x,delta_y)
+                #選択した画像を上に持ってくる
+                canvas.tag_raise(self.rect_list[i].item_id)
+
             self.position = [position_x,position_y]
 
     def create_image(self,canvas,position_x,position_y,myimg):
         fn = glob.glob('rect.png')
         for i in range(constant.NUMBER_IMAGE):
             rect = myimage.MyImage()
-            rect.load_image(canvas,fn[0])
+            rect.load_image(canvas,fn[0],constant.MYFRAME_IMAGE_TAG)
             widht = float(myimg.get_width())
             height = float(myimg.get_height())
             pos_x = position_x + widht * self.myimage_position_list[i][0]
             pos_y = position_y + height * self.myimage_position_list[i][1]
             #枠は画像よりちょっと大き目なのでそれを考慮した座標を指定する
             rect.set_position(canvas,
-            pos_x + constant.ADD_FRAME_SIZE * self.myimage_position_list[i][2],
-            pos_y + constant.ADD_FRAME_SIZE * self.myimage_position_list[i][3]
+            pos_x + constant.ADD_FRAME_SIZE * self.myimage_position_list[i][2] * 3,
+            pos_y + constant.ADD_FRAME_SIZE * self.myimage_position_list[i][3] * 3
             )
+            canvas.tag_raise(rect.item_id)
             self.rect_list[i] = rect
 
     #座標と画像の大きさ
@@ -111,12 +115,15 @@ class MyFrame():
         self.position2_y,
         outline='red') 
 
-        if self.is_move == False:
-            self.create_image(canvas,position_x,position_y,myimg)
+       
+        self.create_image(canvas,position_x,position_y,myimg)
 
 
     def delete_frame(self,canvas):
         #枠を削除する
         canvas.delete(self.rect)
         self.rect = None
+        for i in self.rect_list:
+            canvas.delete(self.rect_list[i].item_id)
+        self.rect_list.clear()
     

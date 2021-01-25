@@ -2,6 +2,7 @@
 #myframe関係
 NUMBER_IMAGE = 8
 MYFRAME_IMAGE_PATH = 'rect.png'
+MYFRAME_IMAGE_TAG = 'rect'
 
 
 
