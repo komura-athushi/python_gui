@@ -1,5 +1,11 @@
 
+#myframe関係
+NUMBER_IMAGE = 8
+MYFRAME_IMAGE_PATH = 'rect.png'
 
+
+
+#mainwindow関係
 #キャンバスの大きさ
 CANVAS_WIDTH = 1280
 CANVAS_HEIGHT = 720

@@ -42,6 +42,14 @@ class MyImage():
         canvas.coords(self.item_id,position_x,position_y)
         self.position=[position_x,position_y]
 
+    #画像を移動量分動かす
+    def move_position(self,canvas,delta_x,delta_y):
+        self.position = [self.position[0]+delta_x,self.position[1]+delta_y]
+        canvas.coords(self.item_id,
+        self.position[0],
+        self.position[1]
+        )
+
     #座標を設定するだけ
     def set_position_no_move(self,position_x,position_y):
         self.position=[position_x,position_y]
