@@ -1,9 +1,25 @@
 
+
+#マウスカーソル
+DEFAULT_MOUSE_CURSOR = 'arrow'
+MOUSE_CURSOR_LIST = [
+    'size_ns',
+    'size_ns',
+    'size_we',
+    'size_we',
+    'size_nw_se',
+    'size_nw_se',
+    'size_ne_sw',
+    'size_ne_sw'
+]
+
 #myframe関係
 NUMBER_IMAGE = 8
 MYFRAME_IMAGE_PATH = 'rect.png'
 MYFRAME_IMAGE_TAG = 'rect'
 
+#myimage関係
+MYIMAGE_MiN_SIZE = 0.03
 
 
 #mainwindow関係
@@ -11,9 +27,9 @@ MYFRAME_IMAGE_TAG = 'rect'
 CANVAS_WIDTH = 1280
 CANVAS_HEIGHT = 720
 #枠のサイズを画像より少し大きくする
-ADD_FRAME_SIZE = 1
+ADD_FRAME_SIZE = 2.0
 #キャンバスを少し大きくする
-ADD_CANVAS_SIZE = 15
+ADD_CANVAS_SIZE = 15.0
 #レベルデータの拡張子
 FILE_EXTENSION = '.casl'
 #ウィンドウの色

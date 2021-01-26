@@ -55,6 +55,8 @@ class MyImage():
     def set_position_no_move(self,position_x,position_y):
         self.position=[position_x,position_y]
 
+    
+
     #画像をリサイズする
     def resize(self):
         self.width=int(self.image_size[0]*self.scale[0])
@@ -64,7 +66,7 @@ class MyImage():
         self.tkimg = ImageTk.PhotoImage(self.img)
         
     def set_scale(self,scale):
-        if scale[0] < 0.01 or scale[1] < 0.01:
+        if scale[0] < constant.MYIMAGE_MiN_SIZE or scale[1] < constant.MYIMAGE_MiN_SIZE:
             return
         self.scale=scale
 
@@ -100,7 +102,6 @@ class MyImage():
             self.name = file[:number]
         else:
             self.name = file[slash_number + 1:number]
-        print(self.name)
         print(self.file_name)
 
 

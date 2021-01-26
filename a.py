@@ -1,32 +1,42 @@
-import tkinter as tk
+from tkinter import *
+import tkinter.ttk as ttk
 
-root = tk.Tk()
-root.geometry("400x200")
+class CursorSample(ttk.Frame):
+    def __init__(self, master):
+        super().__init__(master)
+        self.create_widgets()
+        self.pack()
 
-# Canvas Widget を生成
-canvas = tk.Canvas(root)
-canvas.pack(side=tk.LEFT, fill=tk.BOTH)
+    def create_widgets(self):
+        mac_cursorlist=[
+        "arrow","top_left_arrow","left_ptr","cross",
+        "crosshair","tcross","ibeam","none","xterm","copyarrow",
+        "aliasarrow","contextualmenuarrow","movearrow","text",
+        "cross-hair","hand","openhand","closedhand",
+        "fist","pointinghand","resize","resizeleft","resizeright",
+        "resizeleftright","resizeup","resizedown","resizeupdown",
+        "resizebottomleft","resizetopleft","resizebottomright",
+        "resizetopright","notallowed","poof","wait","countinguphand",
+        "countingdownhand","countingupanddownhand","spinning",
+        "help","bucket","cancel","eyedrop","eyedrop-full","zoom-in",
+        "zoom-out"
+        ]
 
-# Scrollbar を生成して配置
-bar = tk.Scrollbar(root, orient=tk.VERTICAL)
-bar.pack(side=tk.RIGHT, fill=tk.Y)
+        cursorlist = ["arrow","center_ptr","crosshair",
+        "fleur","ibeam","icon","none","sb_h_double_arrow",
+        "sb_v_double_arrow","watch","xterm","no",
+        "starting","size","size_ne_sw","size_ns","size_nw_se",
+        "size_we","uparrow","wait"]
+        for item in cursorlist:
+            frame = ttk.Labelframe(self,text="cursor",width="30",height="30")
+            frame.pack()
+            label=ttk.Label(frame,width="",text=item,cursor=item)
+            label.pack()
 
-# Scrollbarを制御をCanvasに通知する処理を追加
-bar.config(command=canvas.yview)
 
-# Canvasのスクロール範囲を設定
-canvas.config(scrollregion=(0,0,400,400))
-
-# Canvasの可動域をScreoobarに通知する処理を追加
-canvas.config(yscrollcommand=bar.set)
-
-# Frame Widgetを 生成
-frame = tk.Frame(canvas)
-
-# Frame Widgetを Canvas Widget上に配置
-canvas.create_window((0,0), window=frame, anchor=tk.NW, width=canvas.cget('width'))
-
-# Frame上に適当なコンテンツを配置
-tk.Label(frame, text="Hello World!!", font=("",24)).pack()
-
-root.mainloop()
+if __name__ == '__main__':
+    master = Tk()
+    master.title("CursorSample")
+    master.geometry("300x800")
+    CursorSample(master)
+    master.mainloop()

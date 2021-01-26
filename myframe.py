@@ -38,6 +38,34 @@ class MyFrame():
 
         self.is_move = False
 
+    #8つの枠のうち、どこの枠をクリックしたのか判断する
+    def determine_where_frame_pressed(self,item_id):
+        for i in self.rect_list:
+            if self.rect_list[i].item_id == item_id:
+                return i 
+
+    def calculate_size_image(self,number_rect,myimage,delta_x,delta_y):
+            #現在の大きさ
+            width = myimage.get_width()
+            height = myimage.get_height()
+
+            #現在の大きさ
+            image_size = myimage.image_size
+
+            #上下左右の枠が押されたいた時
+            if number_rect < len(self.rect_list) / 2:
+                delta_x *= self.myimage_position_list[number_rect][2]
+                delta_y *= self.myimage_position_list[number_rect][3]
+                width += delta_x * 2
+                height += delta_y * 2
+                return width / image_size[0], height / image_size[1]
+            else:
+                delta = delta_x * self.myimage_position_list[number_rect][2] + delta_y * self.myimage_position_list[number_rect][3]
+                width += delta
+                height += delta
+                scale = (width / image_size[0] + height / image_size[1]) / 2
+                return scale,scale
+
     #座標を取得
     #それぞれ左上と右下のxとy
     def get_position(self):
@@ -77,7 +105,7 @@ class MyFrame():
             self.position = [position_x,position_y]
 
     def create_image(self,canvas,position_x,position_y,myimg):
-        fn = glob.glob('rect.png')
+        fn = glob.glob('Assets/rect.png')
         for i in range(constant.NUMBER_IMAGE):
             rect = myimage.MyImage()
             rect.load_image(canvas,fn[0],constant.MYFRAME_IMAGE_TAG)
@@ -87,10 +115,9 @@ class MyFrame():
             pos_y = position_y + height * self.myimage_position_list[i][1]
             #枠は画像よりちょっと大き目なのでそれを考慮した座標を指定する
             rect.set_position(canvas,
-            pos_x + constant.ADD_FRAME_SIZE * self.myimage_position_list[i][2] * 3,
-            pos_y + constant.ADD_FRAME_SIZE * self.myimage_position_list[i][3] * 3
+            pos_x + constant.ADD_FRAME_SIZE * self.myimage_position_list[i][2],
+            pos_y + constant.ADD_FRAME_SIZE * self.myimage_position_list[i][3]
             )
-            canvas.tag_raise(rect.item_id)
             self.rect_list[i] = rect
 
     #座標と画像の大きさ

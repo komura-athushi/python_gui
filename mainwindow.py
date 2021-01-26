@@ -49,10 +49,26 @@ class Application(tk.Frame):
         #セレクトしている画像
         self.number_image = None
 
+        #画像が押された
         self.is_pressed_image = False
 
         #画像の隅の四角が押された
         self.is_pressed_rect = False
+
+        #どこの隅の画像を押したか
+        self.number_rect = None
+
+    #キャンバス座標をtkEngineの座標に変換する
+    def convert_canvas_position_to_tk_position(self,position_x,position_y):
+        position_x -= constant.ADD_CANVAS_SIZE
+        position_y -= constant.ADD_CANVAS_SIZE
+        return position_x,position_y
+
+    #tkEngine座標をキャンバス座標に変換する
+    def convert_tk_position_to_canvas_position(self,position_x,position_y):
+        position_x += constant.ADD_CANVAS_SIZE
+        position_y += constant.ADD_CANVAS_SIZE
+        return position_x,position_y
 
     #画像の情報をインスペクターウィンドウに反映させる
     def reflect_information_inspector_window(self):
@@ -68,8 +84,10 @@ class Application(tk.Frame):
         self.inspector_image_position_x_entry.delete(0, tk.END)
         self.inspector_image_position_y_entry.delete(0, tk.END)
         position = myimg.get_position()
-        self.inspector_image_position_x_entry.insert(tk.END,position[0]-constant.ADD_CANVAS_SIZE)
-        self.inspector_image_position_y_entry.insert(tk.END,position[1]-constant.ADD_CANVAS_SIZE)
+        #キャンバス座標をtk座標に変換
+        position_x,position_y = self.convert_canvas_position_to_tk_position(position[0],position[1])
+        self.inspector_image_position_x_entry.insert(tk.END,position_x)
+        self.inspector_image_position_y_entry.insert(tk.END,position_y)
 
         #ピクセル数
         width=myimg.get_width()
@@ -99,10 +117,10 @@ class Application(tk.Frame):
         except:
             print(11111)
             return
-        #枠を生成する
-        self.myframe.create_frame(self.canvas,image_position_x,image_position_y,myimage)
         #選択した画像を上に持ってくる
         self.canvas.tag_raise(self.item_id)
+        #枠を生成する
+        self.myframe.create_frame(self.canvas,image_position_x,image_position_y,myimage)
 
         #インスペクターウィンドウに情報を反映させる
         self.reflect_information_inspector_window()
@@ -122,11 +140,35 @@ class Application(tk.Frame):
         self.select_image()
         self.number_image = number[0]
             
+    #画像の隅にカーソルが乗ったら、マウスカーソルを変更する
+    def enter_rect(self,event):
+        #選択された画像を持ってくる
+        item_id = self.canvas.find_closest(event.x, event.y)[0]
+        item = None
+        try:
+            number_rect = self.myframe.determine_where_frame_pressed(item_id)
+            item=constant.MOUSE_CURSOR_LIST[number_rect]
+        except:
+            print(number_rect)
+        
+        self.master.configure(cursor=item)
+
+    #枠からマウスカーソルが離れた時、画像のサイズを変更中でなければ
+    #マウスカーソルを元に戻す
+    def leave_rect(self,event):
+        if self.is_pressed_rect == False:
+            self.master.configure(cursor=constant.DEFAULT_MOUSE_CURSOR)
+    
+    #画像の隅に表示している枠をクリックしたときに処理
     def pressed_rect(self,event):
         #クリックした場所を保存
         self.pressed_x = event.x
         self.pressed_y = event.y
         self.is_pressed_rect = True
+        #選択された画像を持ってくる
+        item_id = self.canvas.find_closest(event.x, event.y)[0]
+        self.number_rect = self.myframe.determine_where_frame_pressed(item_id)
+
     
     #画像がクリックされたときの処理
     def pressed(self,event):
@@ -161,16 +203,14 @@ class Application(tk.Frame):
             #画像の素の大きさ
             image_size=myimg.image_size
 
+            scale_x,scale_y = self.myframe.calculate_size_image(self.number_rect,myimg,delta_x,delta_y)
+
             #リサイズ予定の大きさ
             #*2を忘れないように
-            width += delta_x*2
-            height -= delta_y*2
+            #width += delta_x*2
+            #height -= delta_y*2
 
-            myimg.set_scale([width / image_size[0],
-            height / image_size[1]])
-
-            #myimg.scale[0] = width / image_size[0]
-            #myimg.scale[1] = height / image_size[1]
+            myimg.set_scale([scale_x,scale_y])
             #リサイズするために一旦消してもう一回読み込む
             self.delete_image()
             self.load_image(myimg)
@@ -204,8 +244,10 @@ class Application(tk.Frame):
         delta_x = event.x - self.pressed_x
         delta_y = event.y - self.pressed_y
         if self.is_pressed_rect == True:  
+            #大きさ変更
             self.change_scale(delta_x,delta_y)
         elif self.is_pressed_image == True:
+            #座標変更
             self.change_position(delta_x,delta_y)
         self.pressed_x = event.x
         self.pressed_y = event.y
@@ -218,6 +260,7 @@ class Application(tk.Frame):
         #各フラグをオフにする
         self.is_pressed_image = False
         self.is_pressed_rect = False
+        self.master.configure(cursor=constant.DEFAULT_MOUSE_CURSOR)
 
     #ファイル読み込みが選択されたときの処理
     def load_image(self,original_myimg=None):
@@ -348,9 +391,13 @@ class Application(tk.Frame):
         self.myimage_list[self.item_id].name = self.inspector_image_name_entry.get()
         self.project_list.insert(self.number_image, self.myimage_list[self.item_id].name)
 
+        #ウィンドウから入力情報持ってくる
+        position_x = float(self.inspector_image_position_x_entry.get())
+        position_y = float(self.inspector_image_position_y_entry.get())
+        position_x,position_y = self.convert_tk_position_to_canvas_position(position_x,position_y)
         self.myimage_list[self.item_id].set_position(self.canvas,
-        float(self.inspector_image_position_x_entry.get())+constant.ADD_CANVAS_SIZE,
-        float(self.inspector_image_position_y_entry.get())+constant.ADD_CANVAS_SIZE)
+        float(position_x),
+        float(position_y))
         self.myimage_list[self.item_id].set_scale([float(self.inspector_image_scale_x_entry.get()),
         float(self.inspector_image_scale_y_entry.get())])
         #リストボックスを選択
@@ -385,11 +432,16 @@ class Application(tk.Frame):
         height=constant.CANVAS_HEIGHT+constant.ADD_CANVAS_SIZE*2,
         bg = constant.WINDOW_COLOR)
         self.canvas.place(x=0, y=0)
+        
         #self.canvas.pack(side=tk.LEFT)
 
         #関数をバインドする
         self.canvas.tag_bind('img', '<ButtonPress-1>', self.pressed)
         self.canvas.tag_bind(constant.MYFRAME_IMAGE_TAG, '<ButtonPress-1>', self.pressed_rect)
+        self.canvas.tag_bind(constant.MYFRAME_IMAGE_TAG, '<Enter>', self.enter_rect)
+        self.canvas.tag_bind(constant.MYFRAME_IMAGE_TAG, '<Leave>', self.leave_rect)
+        
+        
         #マウスの座標を表示したい
         self.canvas.bind('<Motion>', self.motion)
         self.canvas.bind('<B1-Motion>', self.dragged)
