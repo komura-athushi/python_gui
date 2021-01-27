@@ -64,10 +64,10 @@ class Application(tk.Frame):
 
     #キャンバス座標をtkEngineの座標に変換する
     def convert_canvas_position_to_tk_position(self,position_x,position_y):
-        position_x /= constant.CANVAS_SMALLER
-        position_y /= constant.CANVAS_SMALLER
         position_x -= constant.ADD_CANVAS_SIZE
         position_y -= constant.ADD_CANVAS_SIZE
+        position_x /= constant.CANVAS_SMALLER
+        position_y /= constant.CANVAS_SMALLER
         return position_x,position_y
 
     #tkEngine座標をキャンバス座標に変換する

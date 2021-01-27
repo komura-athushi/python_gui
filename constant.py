@@ -41,7 +41,7 @@ CANVAS_COLOR = 'white'
 
 #マウス座標表示のラベルの位置
 LABEL_RELX=0.01 
-LABEL_RELY=0.865
+LABEL_RELY=0.96
 
 #インスペクターウィンドウ？関連
 #横幅
