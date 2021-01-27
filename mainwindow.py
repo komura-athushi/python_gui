@@ -18,7 +18,7 @@ class Application(tk.Frame):
         super().__init__(master)
         #なんか作って
         self.master = master
-        self.master.title('python gui')
+        self.master.title('python_gui')
         #self.master.geometry("1920x1080")
         #ウィンドウ最大可
         self.master.state('zoomed')
@@ -148,7 +148,7 @@ class Application(tk.Frame):
         item_id = self.canvas.find_closest(event.x, event.y)[0]
         item = None
         try:
-            #IDからカーソルが乗った枠を判断する
+            #IDからカーソルが乗った枠がどれかを判断する
             number_rect = self.myframe.determine_where_frame_pressed(item_id)
             item=constant.MOUSE_CURSOR_LIST[number_rect]
         except:
@@ -157,12 +157,14 @@ class Application(tk.Frame):
             number_rect = self.myframe.determine_where_frame_pressed_from_position(x,y)
             item=constant.MOUSE_CURSOR_LIST[number_rect]
     
+        #マウスのカーソルを変更する
         self.master.configure(cursor=item)
 
     #枠からマウスカーソルが離れた時、画像のサイズを変更中でなければ
     #マウスカーソルを元に戻す
     def leave_rect(self,event):
         if self.is_pressed_rect == False:
+            #マウスカーソルをデフォルトに戻す
             self.master.configure(cursor=constant.DEFAULT_MOUSE_CURSOR)
     
     #画像の隅に表示している枠をクリックしたときに処理
@@ -278,6 +280,9 @@ class Application(tk.Frame):
                 ('jpg画像','*.jpg')]
             #ファイル選択ダイアログを表示
             fn = filedialog.askopenfilename(filetypes=typ)
+            #ファイルが選択されてなかったら処理しない
+            if len(fn) == 0:
+                return
         else:
             fn=original_myimg.file_name
         #画像読み込み
@@ -308,6 +313,9 @@ class Application(tk.Frame):
         typ = [('レベル','*'+constant.FILE_EXTENSION)]
         #ファイル選択ダイアログを表示
         fn = filedialog.askopenfilename(filetypes=typ)
+        #ファイルが選択されてなかったら処理しない
+        if len(fn) == 0:
+            return
         f = open(fn, 'rb')
         data = f.read()
         #ファイルをオープンする、withでcloseをしなくていいらしい
@@ -324,7 +332,7 @@ class Application(tk.Frame):
         #ファイル選択ダイアログを表示
         fn = filedialog.asksaveasfilename(filetypes=typ)
         #保存先のファイルが何も選択されてない場合は以下の処理をしない
-        if fn == '':
+        if len(fn) == 0:
             return
         if fn.find(constant.FILE_EXTENSION) == -1:
             fn += constant.FILE_EXTENSION
@@ -435,6 +443,24 @@ class Application(tk.Frame):
         self.delete_image()
         self.load_image(myimg)
         
+    #画像を左上に配置する
+    def move_image_upper_left(self):
+        if self.item_id == None:
+            return
+        myimg = self.myimage_list[self.item_id]
+        width = myimg.get_width()
+        height = myimg.get_height()
+
+        position_x = width / 2 + constant.ADD_CANVAS_SIZE
+        position_y = height / 2 + constant.ADD_CANVAS_SIZE
+        self.move_image(position_x,position_y)
+    
+    #画像を移動させる
+    #座標はキャンバス座標
+    def move_image(self,position_x,position_y):
+        myimg = self.myimage_list[self.item_id]
+        myimg.set_position(self.canvas,position_x,position_y)
+        self.select_image()
 
     #今は使ってない
     #使うときが来るかもしれない
@@ -497,11 +523,18 @@ class Application(tk.Frame):
         self.mbar = tk.Menu()
         #メニューコマンドを生成
         self.mcom = tk.Menu(self.mbar,tearoff=0)
+        self.mcom2 = tk.Menu(self.mbar,tearoff=0)
         #コマンドを追加
         self.mcom.add_command(label='画像読み込み',command=self.load_image)
         self.mcom.add_command(label='レベル読み込み',command=self.load_level)
         self.mcom.add_command(label='レベル書き出し',command=self.export_level)
         self.mbar.add_cascade(label='ファイル',menu=self.mcom)
+        self.mcom2.add_command(label='左上',command=self.move_image_upper_left)
+        self.mcom2.add_command(label='左下',command=self.load_level)
+        self.mcom2.add_command(label='右上',command=self.export_level)
+        self.mcom2.add_command(label='右下',command=self.export_level)
+        self.mcom2.add_command(label='中央',command=self.export_level)
+        self.mbar.add_cascade(label='画像移動',menu=self.mcom2)
         self.master['menu'] = self.mbar
 
     #ラベルを初期化

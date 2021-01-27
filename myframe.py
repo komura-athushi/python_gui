@@ -49,10 +49,13 @@ class MyFrame():
     #座標はキャンバス座標
     def determine_where_frame_pressed_from_position(self,position_x,position_y):
         number = 0
+        #float型の最大値を代入する
         min_diff = sys.float_info.max   
         for i in self.rect_list:
             rect_position = self.rect_list[i].get_position()
+            #マウスの座標と、各枠の座標の距離を求める
             diff = abs(rect_position[0] - position_x) + abs(rect_position[1] - position_y)
+            #距離が一番小さい枠の番号を求める
             if min_diff > diff:
                 min_diff = diff
                 number =i
