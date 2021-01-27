@@ -46,6 +46,8 @@ class Application(tk.Frame):
         #読み込んだ画像のリスト
         self.myimage_list = {}
 
+        self.myframe = myframe.MyFrame()
+
         #セレクトしている画像
         self.number_image = None
 
@@ -146,11 +148,15 @@ class Application(tk.Frame):
         item_id = self.canvas.find_closest(event.x, event.y)[0]
         item = None
         try:
+            #IDからカーソルが乗った枠を判断する
             number_rect = self.myframe.determine_where_frame_pressed(item_id)
             item=constant.MOUSE_CURSOR_LIST[number_rect]
         except:
-            print(number_rect)
-        
+            #IDから判断出来なかった場合、座標から判断する
+            x,y = self.convert_canvas_position_to_tk_position(event.x,event.y)
+            number_rect = self.myframe.determine_where_frame_pressed_from_position(x,y)
+            item=constant.MOUSE_CURSOR_LIST[number_rect]
+    
         self.master.configure(cursor=item)
 
     #枠からマウスカーソルが離れた時、画像のサイズを変更中でなければ
@@ -297,6 +303,20 @@ class Application(tk.Frame):
         self.project_list.select_set(number)
         self.number_image = number
 
+    def load_level(self):
+        #読み込むファイルの拡張子を指定
+        typ = [('レベル','*'+constant.FILE_EXTENSION)]
+        #ファイル選択ダイアログを表示
+        fn = filedialog.askopenfilename(filetypes=typ)
+        f = open(fn, 'rb')
+        data = f.read()
+        #ファイルをオープンする、withでcloseをしなくていいらしい
+        with open(fn,'rb') as file:
+            f = file.read()
+            print(f)
+
+    
+
     #レベルデータを出力する
     def export_level(self):
         #読み込むファイルの拡張子を指定
@@ -312,14 +332,20 @@ class Application(tk.Frame):
         with open(fn,'wb') as file:
             for i in self.myimage_list:
                 myimg=self.myimage_list[i]
-                #画像の名前を書き出す
-                file.write(bytes((str(myimg.name) + ' ').encode()))
                 #画像の座標を取得
                 x,y = myimg.get_position()
                 #画像の座標を書き出す
-                file.write(bytes((str(x-constant.ADD_CANVAS_SIZE) + ' ').encode()))
-                file.write(bytes((str(y-constant.ADD_CANVAS_SIZE) + ' ').encode()))
+                #キャンバス座標をtk座標に変換する
+                x,y=self.convert_canvas_position_to_tk_position(x,y)
                 scale=myimg.scale
+
+                #画像の名前を書き出す
+                file.write(bytes((str(myimg.name) + ' ').encode()))
+                #画像のファイルパスを書き出す
+                file.write(bytes((str(myimg.file_name) + ' ').encode()))
+                #座標を書き出す
+                file.write(bytes((str(x) + ' ').encode()))
+                file.write(bytes((str(y) + ' ').encode()))
                 #画像のスケールを書き出す
                 file.write(bytes((str(scale[0]) + ' ').encode()))
                 file.write(bytes((str(scale[1]) + ' ').encode()))
@@ -330,7 +356,8 @@ class Application(tk.Frame):
     #マウスが動いた時の処理
     def motion(self,event):
         #マウス座標を取得する
-        self.label['text'] = 'x : {}, y : {}'.format(event.x - constant.ADD_CANVAS_SIZE,event.y - constant.ADD_CANVAS_SIZE)
+        x,y=self.convert_canvas_position_to_tk_position(event.x,event.y)
+        self.label['text'] = 'x : {}, y : {}'.format(x,y)
 
     #画像を複製する
     def duplicate_image(self):
@@ -456,8 +483,6 @@ class Application(tk.Frame):
         #キャンバスの色をウィンドウの色と同じにする
         #self.canvas['bg'] = self.master['bg']
         self.canvas['bg'] = constant.CANVAS_COLOR
-
-        self.myframe = myframe.MyFrame()
         
 
     #色々初期化
@@ -474,6 +499,7 @@ class Application(tk.Frame):
         self.mcom = tk.Menu(self.mbar,tearoff=0)
         #コマンドを追加
         self.mcom.add_command(label='画像読み込み',command=self.load_image)
+        self.mcom.add_command(label='レベル読み込み',command=self.load_level)
         self.mcom.add_command(label='レベル書き出し',command=self.export_level)
         self.mbar.add_cascade(label='ファイル',menu=self.mcom)
         self.master['menu'] = self.mbar

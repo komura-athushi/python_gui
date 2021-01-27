@@ -29,7 +29,6 @@ class MyImage():
         position=opp.get_position()
         self.set_position(canvas,position[0],position[1])
         self.scale=opp.scale
-        self.img = opp.img
         self.is_copy = True
 
     #画像の座標を取得

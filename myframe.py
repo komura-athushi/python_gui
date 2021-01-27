@@ -5,6 +5,7 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 import re
 import glob
+import sys
 
 import myimage
 import constant
@@ -43,6 +44,19 @@ class MyFrame():
         for i in self.rect_list:
             if self.rect_list[i].item_id == item_id:
                 return i 
+    
+    #座標からどこの枠が選択されたのか判断する
+    #座標はキャンバス座標
+    def determine_where_frame_pressed_from_position(self,position_x,position_y):
+        number = 0
+        min_diff = sys.float_info.max   
+        for i in self.rect_list:
+            rect_position = self.rect_list[i].get_position()
+            diff = abs(rect_position[0] - position_x) + abs(rect_position[1] - position_y)
+            if min_diff > diff:
+                min_diff = diff
+                number =i
+        return number
 
     def calculate_size_image(self,number_rect,myimage,delta_x,delta_y):
             #現在の大きさ
