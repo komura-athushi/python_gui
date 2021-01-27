@@ -461,6 +461,56 @@ class Application(tk.Frame):
         position_y = height / 2 + constant.ADD_CANVAS_SIZE
         self.move_image(position_x,position_y)
     
+    #画像を左下に配置する
+    def move_image_lower_left(self):
+        if self.item_id == None:
+            return
+        myimg = self.myimage_list[self.item_id]
+        width = myimg.get_width()
+        height = myimg.get_height()
+
+        position_x = width / 2 + constant.ADD_CANVAS_SIZE
+        position_y = (constant.CANVAS_HEIGHT * constant.CANVAS_SMALLER) - height / 2 + constant.ADD_CANVAS_SIZE
+        self.move_image(position_x,position_y)
+
+    
+
+    #画像を右上に配置する
+    def move_image_upper_right(self):
+        if self.item_id == None:
+            return
+        myimg = self.myimage_list[self.item_id]
+        width = myimg.get_width()
+        height = myimg.get_height()
+
+        position_x = (constant.CANVAS_WIDTH * constant.CANVAS_SMALLER) - width / 2 + constant.ADD_CANVAS_SIZE
+        position_y = height / 2 + constant.ADD_CANVAS_SIZE
+        self.move_image(position_x,position_y)
+
+    #画像を右下に配置する
+    def move_image_lower_right(self):
+        if self.item_id == None:
+            return
+        myimg = self.myimage_list[self.item_id]
+        width = myimg.get_width()
+        height = myimg.get_height()
+
+        position_x = (constant.CANVAS_WIDTH * constant.CANVAS_SMALLER) - width / 2 + constant.ADD_CANVAS_SIZE
+        position_y = (constant.CANVAS_HEIGHT * constant.CANVAS_SMALLER) - height / 2 + constant.ADD_CANVAS_SIZE
+        self.move_image(position_x,position_y)
+
+    #画像を中央に配置する
+    def move_image_center(self):
+        if self.item_id == None:
+            return
+        myimg = self.myimage_list[self.item_id]
+        width = myimg.get_width()
+        height = myimg.get_height()
+
+        position_x = constant.CANVAS_WIDTH/2 * constant.CANVAS_SMALLER + constant.ADD_CANVAS_SIZE
+        position_y = constant.CANVAS_HEIGHT/2 * constant.CANVAS_SMALLER + constant.ADD_CANVAS_SIZE
+        self.move_image(position_x,position_y)
+    
     #画像を移動させる
     #座標はキャンバス座標
     def move_image(self,position_x,position_y):
@@ -536,11 +586,11 @@ class Application(tk.Frame):
         self.mcom.add_command(label='レベル書き出し',command=self.export_level)
         self.mbar.add_cascade(label='ファイル',menu=self.mcom)
         self.mcom2.add_command(label='左上',command=self.move_image_upper_left)
-        self.mcom2.add_command(label='左下',command=self.load_level)
-        self.mcom2.add_command(label='右上',command=self.export_level)
-        self.mcom2.add_command(label='右下',command=self.export_level)
-        self.mcom2.add_command(label='中央',command=self.export_level)
-        self.mbar.add_cascade(label='画像移動',menu=self.mcom2)
+        self.mcom2.add_command(label='左下',command=self.move_image_lower_left)
+        self.mcom2.add_command(label='右上',command=self.move_image_upper_right)
+        self.mcom2.add_command(label='右下',command=self.move_image_lower_right)
+        self.mcom2.add_command(label='中央',command=self.move_image_center)
+        self.mbar.add_cascade(label='配置',menu=self.mcom2)
         self.master['menu'] = self.mbar
 
     #ラベルを初期化
