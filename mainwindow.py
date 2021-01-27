@@ -60,14 +60,20 @@ class Application(tk.Frame):
         #どこの隅の画像を押したか
         self.number_rect = None
 
+        self.true_size_canvas = [constant.CANVAS_WIDTH * constant.CANVAS_SMALLER,constant.CANVAS_WIDTH * constant.CANVAS_SMALLER]
+
     #キャンバス座標をtkEngineの座標に変換する
     def convert_canvas_position_to_tk_position(self,position_x,position_y):
+        position_x /= constant.CANVAS_SMALLER
+        position_y /= constant.CANVAS_SMALLER
         position_x -= constant.ADD_CANVAS_SIZE
         position_y -= constant.ADD_CANVAS_SIZE
         return position_x,position_y
 
     #tkEngine座標をキャンバス座標に変換する
     def convert_tk_position_to_canvas_position(self,position_x,position_y):
+        position_x *= constant.CANVAS_SMALLER
+        position_y *= constant.CANVAS_SMALLER
         position_x += constant.ADD_CANVAS_SIZE
         position_y += constant.ADD_CANVAS_SIZE
         return position_x,position_y
@@ -481,8 +487,8 @@ class Application(tk.Frame):
     def init_canvas(self):
         #キャンバス作って
         self.canvas = tk.Canvas(self,
-        width=constant.CANVAS_WIDTH+constant.ADD_CANVAS_SIZE*2,
-        height=constant.CANVAS_HEIGHT+constant.ADD_CANVAS_SIZE*2,
+        width=constant.CANVAS_WIDTH*constant.CANVAS_SMALLER+constant.ADD_CANVAS_SIZE*2,
+        height=constant.CANVAS_HEIGHT*constant.CANVAS_SMALLER+constant.ADD_CANVAS_SIZE*2,
         bg = constant.WINDOW_COLOR)
         self.canvas.place(x=0, y=0)
         
@@ -503,8 +509,8 @@ class Application(tk.Frame):
         self.canvas_rect = self.canvas.create_rectangle(
             constant.ADD_CANVAS_SIZE,
             constant.ADD_CANVAS_SIZE,
-            constant.CANVAS_WIDTH + constant.ADD_CANVAS_SIZE,
-            constant.CANVAS_HEIGHT + constant.ADD_CANVAS_SIZE
+            constant.CANVAS_WIDTH * constant.CANVAS_SMALLER + constant.ADD_CANVAS_SIZE,
+            constant.CANVAS_HEIGHT * constant.CANVAS_SMALLER + constant.ADD_CANVAS_SIZE
         )
         #キャンバスの色をウィンドウの色と同じにする
         #self.canvas['bg'] = self.master['bg']
@@ -617,11 +623,11 @@ class Application(tk.Frame):
         self.inspector_pixel_size_x_text = tk.StringVar()
         self.inspector_pixel_size_x_text.set('X : ')
         self.inspector_pixel_size_x = tk.Label(self.inspector,textvariable=self.inspector_pixel_size_x_text,font=('','10'))
-        self.inspector_pixel_size_x.place(x=constant.INSPECTOR_STANDARS_POSITION_X,y=constant.INSPECTPR_PIXEL_XY_Y)
+        self.inspector_pixel_size_x.place(x=constant.INSPECTOR_STANDARS_POSITION_X,y=constant.INSPECTOR_PIXEL_XY_Y)
         self.inspector_pixel_size_y_text = tk.StringVar()
         self.inspector_pixel_size_y_text.set('Y : ')
         self.inspector_pixel_size_y = tk.Label(self.inspector,textvariable=self.inspector_pixel_size_y_text,font=('','10'))
-        self.inspector_pixel_size_y.place(x=constant.INSPECTPR_PIXEL_Y_X,y=constant.INSPECTPR_PIXEL_XY_Y)
+        self.inspector_pixel_size_y.place(x=constant.INSPECTOR_PIXEL_Y_X,y=constant.INSPECTOR_PIXEL_XY_Y)
 
     #インスペクターウィンドウ？の初期化
     def init_inspector(self):
@@ -645,7 +651,7 @@ class Application(tk.Frame):
 
 
         self.inspector_button = tk.Button(self.inspector,text='入力項目を反映させる',command=self.apply_input_information,fg='red')
-        self.inspector_button.place(x=40,y=360)
+        self.inspector_button.place(x=constant.INSPECTOR_BUTTON_X,y=constant.INSPECTOR_BUTTON_Y)
     
     #プロジェクトウィンドウ？の初期化
     def init_project(self):

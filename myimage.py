@@ -13,7 +13,8 @@ class MyImage():
         self.file_name = None
         self.name = None
         self.scale= [1.0,1.0]
-        self.position = [constant.CANVAS_WIDTH/2 + constant.ADD_CANVAS_SIZE,constant.CANVAS_HEIGHT/2 + constant.ADD_CANVAS_SIZE]
+        self.position = [constant.CANVAS_WIDTH/2 * constant.CANVAS_SMALLER + constant.ADD_CANVAS_SIZE,
+        constant.CANVAS_HEIGHT/2 * constant.CANVAS_SMALLER + constant.ADD_CANVAS_SIZE]
 
         self.img = None
         self.tkimg = None
@@ -58,8 +59,8 @@ class MyImage():
 
     #画像をリサイズする
     def resize(self):
-        self.width=int(self.image_size[0]*self.scale[0])
-        self.height=int(self.image_size[1]*self.scale[1])
+        self.width=int(self.image_size[0]*self.scale[0]*constant.CANVAS_SMALLER)
+        self.height=int(self.image_size[1]*self.scale[1]*constant.CANVAS_SMALLER)
         self.img = self.img.resize((self.width,self.height))
         #このImageTk?は保持しておかないといけないらしい
         self.tkimg = ImageTk.PhotoImage(self.img)
