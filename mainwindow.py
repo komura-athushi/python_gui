@@ -98,8 +98,8 @@ class Application(tk.Frame):
         self.inspector_image_position_y_entry.insert(tk.END,position_y)
 
         #ピクセル数
-        width=myimg.get_width()
-        height=myimg.get_height()
+        width=myimg.false_width
+        height=myimg.false_height
         self.inspector_pixel_size_x_text.set('X : '+str(width))
         self.inspector_pixel_size_y_text.set('Y : '+str(height))
 
@@ -159,8 +159,8 @@ class Application(tk.Frame):
             item=constant.MOUSE_CURSOR_LIST[number_rect]
         except:
             #IDから判断出来なかった場合、座標から判断する
-            x,y = self.convert_canvas_position_to_tk_position(event.x,event.y)
-            number_rect = self.myframe.determine_where_frame_pressed_from_position(x,y)
+            #x,y = self.convert_canvas_position_to_tk_position(event.x,event.y)
+            number_rect = self.myframe.determine_where_frame_pressed_from_position(event.x,event.y)
             item=constant.MOUSE_CURSOR_LIST[number_rect]
     
         #マウスのカーソルを変更する
@@ -259,7 +259,7 @@ class Application(tk.Frame):
         delta_y = event.y - self.pressed_y
         if self.is_pressed_rect == True:  
             #大きさ変更
-            self.change_scale(delta_x,delta_y)
+            self.change_scale(event.x,event.y)
         elif self.is_pressed_image == True:
             #座標変更
             self.change_position(delta_x,delta_y)
@@ -371,7 +371,8 @@ class Application(tk.Frame):
     def motion(self,event):
         #マウス座標を取得する
         x,y=self.convert_canvas_position_to_tk_position(event.x,event.y)
-        self.label['text'] = 'x : {}, y : {}'.format(x,y)
+        #self.label['text'] = 'x : {}, y : {}'.format(x,y)
+        self.label['text'] = 'x : {}, y : {}'.format(event.x,event.y)
 
     #画像を複製する
     def duplicate_image(self):
@@ -433,6 +434,7 @@ class Application(tk.Frame):
         self.project_list.insert(self.number_image, self.myimage_list[self.item_id].name)
 
         #ウィンドウから入力情報持ってくる
+        #座標
         position_x = float(self.inspector_image_position_x_entry.get())
         position_y = float(self.inspector_image_position_y_entry.get())
         position_x,position_y = self.convert_tk_position_to_canvas_position(position_x,position_y)
@@ -449,9 +451,13 @@ class Application(tk.Frame):
         self.delete_image()
         self.load_image(myimg)
         
+    def message(self):
+        messagebox.showerror('エラー', '画像を選択してください')
+
     #画像を左上に配置する
-    def move_image_upper_left(self):
+    def place_image_upper_left(self):
         if self.item_id == None:
+            self.message()
             return
         myimg = self.myimage_list[self.item_id]
         width = myimg.get_width()
@@ -459,11 +465,12 @@ class Application(tk.Frame):
 
         position_x = width / 2 + constant.ADD_CANVAS_SIZE
         position_y = height / 2 + constant.ADD_CANVAS_SIZE
-        self.move_image(position_x,position_y)
+        self.place_image(position_x,position_y)
     
     #画像を左下に配置する
-    def move_image_lower_left(self):
+    def place_image_lower_left(self):
         if self.item_id == None:
+            self.message()
             return
         myimg = self.myimage_list[self.item_id]
         width = myimg.get_width()
@@ -471,13 +478,14 @@ class Application(tk.Frame):
 
         position_x = width / 2 + constant.ADD_CANVAS_SIZE
         position_y = (constant.CANVAS_HEIGHT * constant.CANVAS_SMALLER) - height / 2 + constant.ADD_CANVAS_SIZE
-        self.move_image(position_x,position_y)
+        self.place_image(position_x,position_y)
 
     
 
     #画像を右上に配置する
-    def move_image_upper_right(self):
+    def place_image_upper_right(self):
         if self.item_id == None:
+            self.message()
             return
         myimg = self.myimage_list[self.item_id]
         width = myimg.get_width()
@@ -485,11 +493,12 @@ class Application(tk.Frame):
 
         position_x = (constant.CANVAS_WIDTH * constant.CANVAS_SMALLER) - width / 2 + constant.ADD_CANVAS_SIZE
         position_y = height / 2 + constant.ADD_CANVAS_SIZE
-        self.move_image(position_x,position_y)
+        self.place_image(position_x,position_y)
 
     #画像を右下に配置する
-    def move_image_lower_right(self):
+    def place_image_lower_right(self):
         if self.item_id == None:
+            self.message()
             return
         myimg = self.myimage_list[self.item_id]
         width = myimg.get_width()
@@ -497,11 +506,12 @@ class Application(tk.Frame):
 
         position_x = (constant.CANVAS_WIDTH * constant.CANVAS_SMALLER) - width / 2 + constant.ADD_CANVAS_SIZE
         position_y = (constant.CANVAS_HEIGHT * constant.CANVAS_SMALLER) - height / 2 + constant.ADD_CANVAS_SIZE
-        self.move_image(position_x,position_y)
+        self.place_image(position_x,position_y)
 
     #画像を中央に配置する
-    def move_image_center(self):
+    def place_image_center(self):
         if self.item_id == None:
+            self.message()
             return
         myimg = self.myimage_list[self.item_id]
         width = myimg.get_width()
@@ -509,11 +519,53 @@ class Application(tk.Frame):
 
         position_x = constant.CANVAS_WIDTH/2 * constant.CANVAS_SMALLER + constant.ADD_CANVAS_SIZE
         position_y = constant.CANVAS_HEIGHT/2 * constant.CANVAS_SMALLER + constant.ADD_CANVAS_SIZE
-        self.move_image(position_x,position_y)
+        self.place_image(position_x,position_y)
+
+    #画像を上に移動させる
+    def move_image_upper(self):
+        if self.item_id == None:
+            self.message()
+            return
+        self.move_image(0,-1)
+
+    #画像を下に移動させる
+    def move_image_lower(self):
+        if self.item_id == None:
+            self.message()
+            return
+        self.move_image(0,1)
+
+    #画像を左に移動させる
+    def move_image_left(self):
+        if self.item_id == None:
+            self.message()
+            return
+        self.move_image(-1,0)
+
+    #画像を右に移動させる
+    def move_image_right(self):
+        if self.item_id == None:
+            self.message()
+            return
+        self.move_image(1,0)
+
+    #画像を移動させる
+    def move_image(self,width,height):
+        myimg = self.myimage_list[self.item_id]
+        width = width * myimg.get_width()
+        height = height * myimg.get_height()
+
+        myimg.move_position(self.canvas,width,height)
+        self.select_image()
+
+    
+    
+
+        
     
     #画像を移動させる
     #座標はキャンバス座標
-    def move_image(self,position_x,position_y):
+    def place_image(self,position_x,position_y):
         myimg = self.myimage_list[self.item_id]
         myimg.set_position(self.canvas,position_x,position_y)
         self.select_image()
@@ -580,17 +632,23 @@ class Application(tk.Frame):
         #メニューコマンドを生成
         self.mcom = tk.Menu(self.mbar,tearoff=0)
         self.mcom2 = tk.Menu(self.mbar,tearoff=0)
+        self.mcom3 = tk.Menu(self.mbar,tearoff=0)
         #コマンドを追加
         self.mcom.add_command(label='画像読み込み',command=self.load_image)
         self.mcom.add_command(label='レベル読み込み',command=self.load_level)
         self.mcom.add_command(label='レベル書き出し',command=self.export_level)
         self.mbar.add_cascade(label='ファイル',menu=self.mcom)
-        self.mcom2.add_command(label='左上',command=self.move_image_upper_left)
-        self.mcom2.add_command(label='左下',command=self.move_image_lower_left)
-        self.mcom2.add_command(label='右上',command=self.move_image_upper_right)
-        self.mcom2.add_command(label='右下',command=self.move_image_lower_right)
-        self.mcom2.add_command(label='中央',command=self.move_image_center)
+        self.mcom2.add_command(label='左上',command=self.place_image_upper_left)
+        self.mcom2.add_command(label='左下',command=self.place_image_lower_left)
+        self.mcom2.add_command(label='右上',command=self.place_image_upper_right)
+        self.mcom2.add_command(label='右下',command=self.place_image_lower_right)
+        self.mcom2.add_command(label='中央',command=self.place_image_center)
         self.mbar.add_cascade(label='配置',menu=self.mcom2)
+        self.mcom3.add_command(label='上',command=self.move_image_upper)
+        self.mcom3.add_command(label='下',command=self.move_image_lower)
+        self.mcom3.add_command(label='左',command=self.move_image_left)
+        self.mcom3.add_command(label='右',command=self.move_image_right)
+        self.mbar.add_cascade(label='移動',menu=self.mcom3)
         self.master['menu'] = self.mbar
 
     #ラベルを初期化

@@ -23,6 +23,9 @@ class MyImage():
         self.tag = None
 
         self.is_copy = False
+
+        self.false_width = None
+        self.false_height = None
     #自身の情報を相手にコピーする
     #oppがコピー元
     def copy_image_infromation(self,canvas,opp):
@@ -44,6 +47,7 @@ class MyImage():
         self.position=[position_x,position_y]
 
     #画像を移動量分動かす
+    #移動量はキャンバス上での移動量
     def move_position(self,canvas,delta_x,delta_y):
         self.position = [self.position[0]+delta_x,self.position[1]+delta_y]
         canvas.coords(self.item_id,
@@ -59,8 +63,11 @@ class MyImage():
 
     #画像をリサイズする
     def resize(self):
-        self.width=int(self.image_size[0]*self.scale[0]*constant.CANVAS_SMALLER)
-        self.height=int(self.image_size[1]*self.scale[1]*constant.CANVAS_SMALLER)
+        
+        self.false_width = int(self.image_size[0]*self.scale[0])
+        self.false_height = int(self.image_size[1]*self.scale[1])
+        self.width=int(self.false_width*constant.CANVAS_SMALLER)
+        self.height=int(self.false_height*constant.CANVAS_SMALLER)
         self.img = self.img.resize((self.width,self.height))
         #このImageTk?は保持しておかないといけないらしい
         self.tkimg = ImageTk.PhotoImage(self.img)

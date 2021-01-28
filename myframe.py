@@ -62,26 +62,54 @@ class MyFrame():
         return number
 
     def calculate_size_image(self,number_rect,myimage,delta_x,delta_y):
-            #現在の大きさ
-            width = myimage.get_width()
-            height = myimage.get_height()
+        
+        #delta_x /= constant.CANVAS_SMALLER
+        #delta_y /= constant.CANVAS_SMALLER
 
-            #現在の大きさ
-            image_size = myimage.image_size
+        #現在の大きさ(実際の大きさ)
+        width = myimage.get_width()
+        height = myimage.get_height()
+        #画像の元の大きさ
+        size_x = myimage.image_size[0]
+        size_y = myimage.image_size[1]
+        size_x = float(size_x)
+        size_y = float(size_y)
+        size_x *= constant.CANVAS_SMALLER
+        size_y *= constant.CANVAS_SMALLER
 
-            #上下左右の枠が押されたいた時
-            if number_rect < len(self.rect_list) / 2:
-                delta_x *= self.myimage_position_list[number_rect][2]
-                delta_y *= self.myimage_position_list[number_rect][3]
-                width += delta_x * 2
-                height += delta_y * 2
-                return width / image_size[0], height / image_size[1]
-            else:
-                delta = delta_x * self.myimage_position_list[number_rect][2] + delta_y * self.myimage_position_list[number_rect][3]
-                width += delta
-                height += delta
-                scale = (width / image_size[0] + height / image_size[1]) / 2
-                return scale,scale
+        size_x = int(size_x)
+        size_y = int(size_y)
+
+        #上下左右の枠が押されたいた時
+        if number_rect < len(self.rect_list) / 2:
+            scale_x = myimage.scale[0]
+            scale_y = myimage.scale[1]
+            position = myimage.get_position()
+            if self.myimage_position_list[number_rect][2] != 0:
+                x = delta_x - position[0]
+                x *= 2.0
+                x *= self.myimage_position_list[number_rect][2]
+                scale_x = x / size_x 
+            if self.myimage_position_list[number_rect][3] != 0:
+                y = delta_y - position[1]
+                y *= 2.0
+                y *= self.myimage_position_list[number_rect][3]
+                scale_y = y / size_y
+            return scale_x, scale_y
+        else:
+            scale_x = myimage.scale[0]
+            scale_y = myimage.scale[1]
+            position = myimage.get_position()
+            x = delta_x - position[0]
+            x *= 2.0
+            x *= self.myimage_position_list[number_rect][2]
+            scale_x = x / size_x 
+            y = delta_y - position[1]
+            y *= 2.0
+            y *= self.myimage_position_list[number_rect][3]
+            scale_y = y / size_y
+            scale = (scale_x + scale_y) / 2
+            return scale, scale
 
     #座標を取得
     #それぞれ左上と右下のxとy
