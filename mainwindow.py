@@ -350,21 +350,28 @@ class Application(tk.Frame):
             for image in data:
                 if image == '':
                     break
-                #空白で分割する
-                image = image.split(',')
-                #インスタンス生成して
-                myimg = myimage.MyImage()
-                #名前入れて
-                myimg.name = image[0]
-                #ファイルパス設定
-                myimg.file_name = image[1]
-                #スケール設定して
-                scale = [float(image[4]),float(image[5])]
-                myimg.set_scale(scale)
-                #座標を設定する
-                position_x,position_y = self.convert_tk_position_to_canvas_position(float(image[2]),float(image[3]))
-                myimg.set_position_no_move(position_x,position_y)
-                self.load_image(myimg)
+                try:
+                    #空白で分割する
+                    image = image.split(',')
+                    #インスタンス生成して
+                    myimg = myimage.MyImage()
+                    #名前入れて
+                    myimg.name = image[0]
+                    #ファイルパス設定
+                    myimg.file_name = image[1]
+                    #スケール設定して
+                    scale = [float(image[4]),float(image[5])]
+                    myimg.set_scale(scale)
+                    #座標を設定する
+                    position_x,position_y = self.convert_tk_position_to_canvas_position(float(image[2]),float(image[3]))
+                    myimg.set_position_no_move(position_x,position_y)
+                except:
+                    messagebox.showerror('エラー', fn + 'の読み込みに失敗しました。')
+                try:
+                    self.load_image(myimg)
+                except:
+                    messagebox.showerror('エラー', image[1] + 'が読み込めませんでした、ファイルパスを確認してください。')
+
             self.select_image()
 
     #レベルデータを出力する
