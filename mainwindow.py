@@ -19,9 +19,10 @@ class Application(tk.Frame):
         #なんか作って
         self.master = master
         self.master.title('python_gui')
-        #self.master.geometry("1920x1080")
+        #とりあえずウィンドウはこれくらいで
+        self.master.geometry("1350x650")
         #ウィンドウ最大可
-        self.master.state('zoomed')
+        #self.master.state('zoomed')
         #色
         self.master.configure(bg=constant.WINDOW_COLOR)
         #これをしないとフレームがどうのこうので
@@ -59,8 +60,6 @@ class Application(tk.Frame):
 
         #どこの隅の画像を押したか
         self.number_rect = None
-
-        self.true_size_canvas = [constant.CANVAS_WIDTH * constant.CANVAS_SMALLER,constant.CANVAS_WIDTH * constant.CANVAS_SMALLER]
 
     #キャンバス座標をtkEngineの座標に変換する
     def convert_canvas_position_to_tk_position(self,position_x,position_y):
@@ -110,7 +109,18 @@ class Application(tk.Frame):
         self.inspector_image_scale_x_entry.insert(tk.END,scale[0])
         self.inspector_image_scale_y_entry.insert(tk.END,scale[1])
 
-       
+    #インスペクターウィンドウの情報を空にする
+    def enpty_information_inspector_window(self):
+        self.inspector_image_name_entry.delete(0, tk.END)
+
+        self.inspector_image_position_x_entry.delete(0, tk.END)
+        self.inspector_image_position_y_entry.delete(0, tk.END)
+
+        self.inspector_pixel_size_x_text.set('')
+        self.inspector_pixel_size_y_text.set('')
+
+        self.inspector_image_scale_x_entry.delete(0, tk.END)
+        self.inspector_image_scale_y_entry.delete(0, tk.END)
 
     #画像が選択されたときの処理
     def select_image(self):
@@ -326,10 +336,33 @@ class Application(tk.Frame):
         data = f.read()
         #ファイルをオープンする、withでcloseをしなくていいらしい
         with open(fn,'rb') as file:
-            f = file.read()
-            print(f)
 
-    
+            #ファイルを読み込んで
+            data = file.read()
+            #bytes型からstr型に変換
+            data = data.decode()
+            #\nで分割する
+            data = data.split('\n')
+            self.delete_all_image()
+            for image in data:
+                if image == '':
+                    break
+                #空白で分割する
+                image = image.split(',')
+                #インスタンス生成して
+                myimg = myimage.MyImage()
+                #名前入れて
+                myimg.name = image[0]
+                #ファイルパス設定
+                myimg.file_name = image[1]
+                #スケール設定して
+                scale = [float(image[4]),float(image[5])]
+                myimg.set_scale(scale)
+                #座標を設定する
+                position_x,position_y = self.convert_tk_position_to_canvas_position(float(image[2]),float(image[3]))
+                myimg.set_position_no_move(position_x,position_y)
+                self.load_image(myimg)
+            self.select_image()
 
     #レベルデータを出力する
     def export_level(self):
@@ -354,15 +387,15 @@ class Application(tk.Frame):
                 scale=myimg.scale
 
                 #画像の名前を書き出す
-                file.write(bytes((str(myimg.name) + ' ').encode()))
+                file.write(bytes((str(myimg.name) + ',').encode()))
                 #画像のファイルパスを書き出す
-                file.write(bytes((str(myimg.file_name) + ' ').encode()))
+                file.write(bytes((str(myimg.file_name) + ',').encode()))
                 #座標を書き出す
-                file.write(bytes((str(x) + ' ').encode()))
-                file.write(bytes((str(y) + ' ').encode()))
+                file.write(bytes((str(x) + ',').encode()))
+                file.write(bytes((str(y) + ',').encode()))
                 #画像のスケールを書き出す
-                file.write(bytes((str(scale[0]) + ' ').encode()))
-                file.write(bytes((str(scale[1]) + ' ').encode()))
+                file.write(bytes((str(scale[0]) + ',').encode()))
+                file.write(bytes((str(scale[1]) + '').encode()))
                 file.write(bytes('\n'.encode()))
         
         messagebox.showinfo('メッセージ', '書き出しに成功しました！')
@@ -371,8 +404,8 @@ class Application(tk.Frame):
     def motion(self,event):
         #マウス座標を取得する
         x,y=self.convert_canvas_position_to_tk_position(event.x,event.y)
-        #self.label['text'] = 'x : {}, y : {}'.format(x,y)
-        self.label['text'] = 'x : {}, y : {}'.format(event.x,event.y)
+        self.label['text'] = 'x : {}, y : {}'.format(x,y)
+        #self.label['text'] = 'x : {}, y : {}'.format(event.x,event.y)
 
     #画像を複製する
     def duplicate_image(self):
@@ -408,8 +441,30 @@ class Application(tk.Frame):
             number2+=1
         #枠を削除する
         self.myframe.delete_frame(self.canvas)
+        #インスペクターウィンドウの情報を空にする
+        self.enpty_information_inspector_window()
         self.item_id = None
         self.number_image = None
+
+    #全ての画像を削除する
+    def delete_all_image(self):
+        for i in self.myimage_list:
+            #画像をキャンバスから削除
+            self.canvas.delete(self.myimage_list[i].item_id)
+
+        #リスト削除
+        self.myimage_list.clear()
+        #リストボックスを削除
+        self.project_list.delete(0, tk.END)
+        #インスペクターウィンドウの情報を空にする
+        self.enpty_information_inspector_window()
+        #枠を削除する
+        self.myframe.delete_frame(self.canvas)
+        #その他変数を初期化する
+        self.item_id = None
+        self.number_image = None
+
+
         
     #文字列検証関数、文字の入力を数字のみに制限させる
     #Falseで入力拒否
@@ -557,11 +612,6 @@ class Application(tk.Frame):
 
         myimg.move_position(self.canvas,width,height)
         self.select_image()
-
-    
-    
-
-        
     
     #画像を移動させる
     #座標はキャンバス座標

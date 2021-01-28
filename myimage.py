@@ -22,10 +22,9 @@ class MyImage():
         self.height=None
         self.tag = None
 
-        self.is_copy = False
-
         self.false_width = None
         self.false_height = None
+    
     #自身の情報を相手にコピーする
     #oppがコピー元
     def copy_image_infromation(self,canvas,opp):
@@ -33,7 +32,6 @@ class MyImage():
         position=opp.get_position()
         self.set_position(canvas,position[0],position[1])
         self.scale=opp.scale
-        self.is_copy = True
 
     #画像の座標を取得
     #戻り値はキャンバス内の座標
@@ -100,7 +98,8 @@ class MyImage():
         tags=tag)
         self.tag = tag
         
-        if self.is_copy==True:
+        #名前が既に付いていたら処理しない
+        if self.name!=None:
             return
         #ファイルの名前を抽出していく、/と.を除いていく
         slash_number = file.rfind('/')
