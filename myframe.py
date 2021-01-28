@@ -121,11 +121,11 @@ class MyFrame():
         if self.rect == None:
             return
         
-        widht = float(myimg.get_width())
+        width = float(myimg.get_width())
         height = float(myimg.get_height())
-        self.position1_x = position_x - widht / 2 - constant.ADD_FRAME_SIZE
+        self.position1_x = position_x - width / 2 - constant.ADD_FRAME_SIZE
         self.position1_y = position_y + height / 2 + constant.ADD_FRAME_SIZE
-        self.position2_x = position_x + widht / 2 + constant.ADD_FRAME_SIZE
+        self.position2_x = position_x + width / 2 + constant.ADD_FRAME_SIZE
         self.position2_y = position_y - height / 2 - constant.ADD_FRAME_SIZE
         canvas.coords(self.rect,
         self.position1_x,
@@ -133,21 +133,24 @@ class MyFrame():
         self.position2_x,
         self.position2_y,)
 
-        self.move_rect(canvas,position_x,position_y)
+        self.move_rect(canvas,position_x,position_y,myimg)
 
     def get_is_rect(self):
         return self.rect != None
 
-    def move_rect(self,canvas,position_x,position_y):
-            delta_x = position_x - self.position[0]
-            delta_y = position_y - self.position[1]
+    def move_rect(self,canvas,position_x,position_y,myimg):
+            width = float(myimg.get_width())
+            height = float(myimg.get_height())
 
             for i in self.rect_list:
-                self.rect_list[i].move_position(canvas,delta_x,delta_y)
-                #選択した画像を上に持ってくる
-                #canvas.tag_raise(self.rect_list[i].item_id)
-
-            self.position = [position_x,position_y]
+                rect = self.rect_list[i]
+                pos_x = position_x + width * self.myimage_position_list[i][0]
+                pos_y = position_y + height * self.myimage_position_list[i][1]
+                #枠は画像よりちょっと大き目なのでそれを考慮した座標を指定する
+                rect.set_position(canvas,
+                pos_x + constant.ADD_FRAME_SIZE * self.myimage_position_list[i][2],
+                pos_y + constant.ADD_FRAME_SIZE * self.myimage_position_list[i][3]
+                )
 
     def create_image(self,canvas,position_x,position_y,myimg):
         fn = glob.glob('Assets/rect.png')
