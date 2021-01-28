@@ -145,7 +145,7 @@ class MyFrame():
             for i in self.rect_list:
                 self.rect_list[i].move_position(canvas,delta_x,delta_y)
                 #選択した画像を上に持ってくる
-                canvas.tag_raise(self.rect_list[i].item_id)
+                #canvas.tag_raise(self.rect_list[i].item_id)
 
             self.position = [position_x,position_y]
 

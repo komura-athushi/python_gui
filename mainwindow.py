@@ -135,15 +135,19 @@ class Application(tk.Frame):
         except:
             print(11111)
             return
-        #選択した画像を上に持ってくる
-        self.canvas.tag_raise(self.item_id)
+        #選択した画像を上に持ってくる、今は停止中
+        #self.canvas.tag_raise(self.item_id)
         #枠を生成する
-        self.myframe.create_frame(self.canvas,image_position_x,image_position_y,myimage)
+        #self.myframe.create_frame(self.canvas,image_position_x,image_position_y,myimage)
+        if self.myframe.get_is_rect() == False: 
+            self.myframe.create_frame(self.canvas,image_position_x,image_position_y,myimage)
+        else:
+            self.myframe.set_position(self.canvas,image_position_x,image_position_y,myimage)
 
         #インスペクターウィンドウに情報を反映させる
         self.reflect_information_inspector_window()
 
-
+    #リストボックスを選択したとき
     def select_listbox(self,event):
         number = self.project_list.curselection()
         #何も選択されてなかったら処理しない
@@ -169,7 +173,6 @@ class Application(tk.Frame):
             item=constant.MOUSE_CURSOR_LIST[number_rect]
         except:
             #IDから判断出来なかった場合、座標から判断する
-            #x,y = self.convert_canvas_position_to_tk_position(event.x,event.y)
             number_rect = self.myframe.determine_where_frame_pressed_from_position(event.x,event.y)
             item=constant.MOUSE_CURSOR_LIST[number_rect]
     
