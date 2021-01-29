@@ -24,6 +24,8 @@ class MyImage():
 
         self.false_width = None
         self.false_height = None
+
+        self.number_layer = 10
     
     #自身の情報を相手にコピーする
     #oppがコピー元
@@ -32,6 +34,7 @@ class MyImage():
         position=opp.get_position()
         self.set_position(canvas,position[0],position[1])
         self.scale=opp.scale
+        self.number_layer = opp.number_layer
 
     #画像の座標を取得
     #戻り値はキャンバス内の座標
@@ -57,7 +60,9 @@ class MyImage():
     def set_position_no_move(self,position_x,position_y):
         self.position=[position_x,position_y]
 
-    
+    #画像を上に持ってくる
+    def raise_image(self,canvas):
+        canvas.tag_raise(self.item_id)
 
     #画像をリサイズする
     def resize(self):

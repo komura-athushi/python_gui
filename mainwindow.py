@@ -109,6 +109,10 @@ class Application(tk.Frame):
         self.inspector_image_scale_x_entry.insert(tk.END,scale[0])
         self.inspector_image_scale_y_entry.insert(tk.END,scale[1])
 
+        #レイヤー優先度
+        self.inspector_layer_entry.delete(0,tk.END)
+        self.inspector_layer_entry.insert(tk.END,myimg.number_layer)
+
     #インスペクターウィンドウの情報を空にする
     def enpty_information_inspector_window(self):
         self.inspector_image_name_entry.delete(0, tk.END)
@@ -121,6 +125,24 @@ class Application(tk.Frame):
 
         self.inspector_image_scale_x_entry.delete(0, tk.END)
         self.inspector_image_scale_y_entry.delete(0, tk.END)
+
+        self.inspector_layer_entry.delete(0, tk.END)
+
+    #レイヤーの優先度順に画像を表示する
+    def display_images_according_layer_priority(self):
+        #レイヤー優先度のリストを作成する
+        layer_list = []
+        for i in self.myimage_list:
+            layer_list.append(self.myimage_list[i].number_layer)
+        #優先度を降順に並び変える
+        layer_list = sorted(layer_list)
+        #レイヤー回して
+        for layer in layer_list:
+            #イメージ回して
+            for j in self.myimage_list:
+                #レイヤー一緒だったらraiseする
+                if layer == self.myimage_list[j].number_layer:
+                    self.myimage_list[j].raise_image(self.canvas)
 
     #画像が選択されたときの処理
     def select_image(self):
@@ -135,6 +157,8 @@ class Application(tk.Frame):
         except:
             print(11111)
             return
+        #レイヤー優先度順に画像を表示させる
+        self.display_images_according_layer_priority()
         #選択した画像を上に持ってくる、今は停止中
         #self.canvas.tag_raise(self.item_id)
         #枠を生成する
@@ -230,7 +254,7 @@ class Application(tk.Frame):
             #画像の素の大きさ
             image_size=myimg.image_size
 
-            scale_x,scale_y = self.myframe.calculate_size_image(self.number_rect,myimg,delta_x,delta_y)
+            scale_x,scale_y = self.myframe.calculate_scale_image(self.number_rect,myimg,delta_x,delta_y)
 
             #リサイズ予定の大きさ
             #*2を忘れないように
@@ -359,8 +383,10 @@ class Application(tk.Frame):
                     myimg.name = image[0]
                     #ファイルパス設定
                     myimg.file_name = image[1]
+                    #レイヤー優先度を設定して
+                    myimg.number_layer = int(image[6])
                     #スケール設定して
-                    scale = [float(image[4]),float(image[5])]
+                    scale = [float(image[7]),float(image[8])]
                     myimg.set_scale(scale)
                     #座標を設定する
                     position_x,position_y = self.convert_tk_position_to_canvas_position(float(image[2]),float(image[3]))
@@ -372,7 +398,8 @@ class Application(tk.Frame):
                 except:
                     messagebox.showerror('エラー', image[1] + 'が読み込めませんでした、ファイルパスを確認してください。')
 
-            self.select_image()
+            #レイヤー優先度順に画像を表示させる
+        self.display_images_according_layer_priority()
 
     #レベルデータを出力する
     def export_level(self):
@@ -395,6 +422,9 @@ class Application(tk.Frame):
                 #キャンバス座標をtk座標に変換する
                 x,y=self.convert_canvas_position_to_tk_position(x,y)
                 scale=myimg.scale
+                width=myimg.false_width
+                height=myimg.false_height
+                layer=myimg.number_layer
 
                 #画像の名前を書き出す
                 file.write(bytes((str(myimg.name) + ',').encode()))
@@ -403,9 +433,17 @@ class Application(tk.Frame):
                 #座標を書き出す
                 file.write(bytes((str(x) + ',').encode()))
                 file.write(bytes((str(y) + ',').encode()))
+                #画像のピクセル数を書き出す
+                file.write(bytes((str(width) + ',').encode()))
+                file.write(bytes((str(height) + ',').encode()))
+                #レイヤー優先度を書き出す
+                file.write(bytes((str(layer) + ',').encode()))
                 #画像のスケールを書き出す
                 file.write(bytes((str(scale[0]) + ',').encode()))
                 file.write(bytes((str(scale[1]) + '').encode()))
+
+
+
                 file.write(bytes('\n'.encode()))
         
         messagebox.showinfo('メッセージ', '書き出しに成功しました！')
@@ -487,15 +525,50 @@ class Application(tk.Frame):
             return True
         else:
             return False
-            
+
+    #文字列検証関数、文字の入力を正数のみに制限させる
+    #Falseで入力拒否
+    def validation_integer(self,before_word, after_word):
+        if len(after_word) == 0:
+            return True
+        #elif (after_word.isdecimal()):
+        #入力された文字が0～9の半角であれば
+        elif re.match(re.compile('[0-9]'),after_word) and ('.' in after_word) == False:
+            return True
+        else:
+            return False
+
+    #入力項目が空かどうか判断する
+    def determine_input_empty(self,entry):
+        if entry == '':
+            messagebox.showerror('エラー', '無効な文字、もしくは空の項目があります。')
+            return True
+        else:
+            return False
+
     
     #入力された情報を反映させる
     def apply_input_information(self):
         #何も選択されてなかったら処理しない
         if self.number_image == None:
+            self.message()
             return
         self.project_list.delete(self.number_image)
-        self.myimage_list[self.item_id].name = self.inspector_image_name_entry.get()
+        #入力項目が空かどうか判断する
+        entry_list = []
+        entry_list.append(self.inspector_image_name_entry.get())
+        entry_list.append(self.inspector_image_position_x_entry.get())
+        entry_list.append(self.inspector_image_position_y_entry.get())
+        entry_list.append(self.inspector_layer_entry.get())
+        entry_list.append(self.inspector_image_scale_x_entry.get())
+        entry_list.append(self.inspector_image_scale_y_entry.get())
+        for entry in entry_list:
+            #入力が空であれば以下の処理をしない
+            if self.determine_input_empty(entry) == True:
+                return
+
+        name = self.inspector_image_name_entry.get()
+        self.myimage_list[self.item_id].name = name
         self.project_list.insert(self.number_image, self.myimage_list[self.item_id].name)
 
         #ウィンドウから入力情報持ってくる
@@ -504,10 +577,12 @@ class Application(tk.Frame):
         position_y = float(self.inspector_image_position_y_entry.get())
         position_x,position_y = self.convert_tk_position_to_canvas_position(position_x,position_y)
         self.myimage_list[self.item_id].set_position(self.canvas,
-        float(position_x),
-        float(position_y))
+        position_x,
+        position_y)
         self.myimage_list[self.item_id].set_scale([float(self.inspector_image_scale_x_entry.get()),
         float(self.inspector_image_scale_y_entry.get())])
+        #レイヤー優先度
+        self.myimage_list[self.item_id].number_layer = int(self.inspector_layer_entry.get())
         #リストボックスを選択
         self.project_list.select_set(self.number_image)
         self.select_image()
@@ -797,6 +872,21 @@ class Application(tk.Frame):
         self.inspector_pixel_size_y = tk.Label(self.inspector,textvariable=self.inspector_pixel_size_y_text,font=('','10'))
         self.inspector_pixel_size_y.place(x=constant.INSPECTOR_PIXEL_Y_X,y=constant.INSPECTOR_PIXEL_XY_Y)
 
+    #インスペクターウィンドウのレイヤー優先度のラベルを初期化する
+    def init_inspector_layer_label(self):
+        inspector_layer = tk.Label(self.inspector,text='レイヤー表示優先度')
+        inspector_layer.place(x=constant.INSPECTOR_STANDARS_POSITION_X,y=constant.INSPECTOR_LAYER_Y)
+        #entryを設定
+        sv = tk.StringVar()
+        self.inspector_layer_entry = tk.Entry(self.inspector,width=constant.INSPECTOR_SCALE_ENTRY_SIZE_X,textvariable=sv)
+        self.inspector_layer_entry.place(x=constant.INSPECTOR_STANDARS_POSITION_X,y=constant.INSPECTOR_LAYER_ENTRY_Y)
+         # %s は変更前文字列, %P は変更後文字列を引数で渡す
+        vcmd = (self.inspector_layer_entry.register(self.validation_integer), '%s', '%P')
+        #Validationコマンドを設定（'key'は文字が入力される毎にイベント発火）
+        self.inspector_layer_entry.configure(validate='key', vcmd=vcmd)
+
+
+
     #インスペクターウィンドウ？の初期化
     def init_inspector(self):
         #ラベル配置
@@ -816,6 +906,8 @@ class Application(tk.Frame):
         #ピクセル項目の初期化
         self.init_inspector_pixel_label()
 
+        #レイヤー表示優先度項目の初期化
+        self.init_inspector_layer_label()
 
 
         self.inspector_button = tk.Button(self.inspector,text='入力項目を反映させる',command=self.apply_input_information,fg='red')

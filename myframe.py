@@ -61,7 +61,7 @@ class MyFrame():
                 number =i
         return number
 
-    def calculate_size_image(self,number_rect,myimage,delta_x,delta_y):
+    def calculate_scale_image(self,number_rect,myimage,delta_x,delta_y):
         
         #delta_x /= constant.CANVAS_SMALLER
         #delta_y /= constant.CANVAS_SMALLER
@@ -132,6 +132,7 @@ class MyFrame():
         self.position1_y,
         self.position2_x,
         self.position2_y,)
+        canvas.tag_raise(self.rect)
 
         self.move_rect(canvas,position_x,position_y,myimg)
 
@@ -139,18 +140,20 @@ class MyFrame():
         return self.rect != None
 
     def move_rect(self,canvas,position_x,position_y,myimg):
-            width = float(myimg.get_width())
-            height = float(myimg.get_height())
+        width = float(myimg.get_width())
+        height = float(myimg.get_height())
 
-            for i in self.rect_list:
-                rect = self.rect_list[i]
-                pos_x = position_x + width * self.myimage_position_list[i][0]
-                pos_y = position_y + height * self.myimage_position_list[i][1]
-                #枠は画像よりちょっと大き目なのでそれを考慮した座標を指定する
-                rect.set_position(canvas,
-                pos_x + constant.ADD_FRAME_SIZE * self.myimage_position_list[i][2],
-                pos_y + constant.ADD_FRAME_SIZE * self.myimage_position_list[i][3]
-                )
+        for i in self.rect_list:
+            rect = self.rect_list[i]
+            pos_x = position_x + width * self.myimage_position_list[i][0]
+            pos_y = position_y + height * self.myimage_position_list[i][1]
+            #枠は画像よりちょっと大き目なのでそれを考慮した座標を指定する
+            rect.set_position(canvas,
+            pos_x + constant.ADD_FRAME_SIZE * self.myimage_position_list[i][2],
+            pos_y + constant.ADD_FRAME_SIZE * self.myimage_position_list[i][3]
+            )
+            canvas.tag_raise(rect.item_id)
+        
 
     def create_image(self,canvas,position_x,position_y,myimg):
         fn = glob.glob('Assets/rect.png')
