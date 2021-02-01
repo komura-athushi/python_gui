@@ -2,6 +2,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import filedialog
 from tkinter import messagebox
+
 from PIL import Image, ImageTk
 import re
 
@@ -371,10 +372,15 @@ class Application(tk.Frame):
             #\nで分割する
             data = data.split('\n')
             self.delete_all_image()
+            number = 0
             for image in data:
-                if image == '':
+                number+=1
+                if number == 1:
+                    continue
+                if image == '': 
                     break
                 try:
+                    print(image)
                     #空白で分割する
                     image = image.split(',')
                     #インスタンス生成して
@@ -397,7 +403,6 @@ class Application(tk.Frame):
                     self.load_image(myimg)
                 except:
                     messagebox.showerror('エラー', image[1] + 'が読み込めませんでした、ファイルパスを確認してください。')
-
             #レイヤー優先度順に画像を表示させる
         self.display_images_according_layer_priority()
 
@@ -414,6 +419,7 @@ class Application(tk.Frame):
             fn += constant.FILE_EXTENSION
         #ファイルをオープンする、withでcloseをしなくていいらしい
         with open(fn,'wb') as file:
+            file.write(bytes((str(len(self.myimage_list)) + '\n').encode()))
             for i in self.myimage_list:
                 myimg=self.myimage_list[i]
                 #画像の座標を取得
