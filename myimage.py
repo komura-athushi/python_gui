@@ -2,6 +2,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import filedialog
 from PIL import Image, ImageTk
+import glob
 import constant
 
 class MyImage():
@@ -93,9 +94,35 @@ class MyImage():
         self.file_name = file
         #画像読み込み
         self.img = Image.open(file)
+        
         #画像のサイズを取得
         self.image_size = self.img.size
+        
+
+        #名前が既に付いていたら処理しない
+        if self.name==None:
+    
+            #ファイルの名前を抽出していく、/と.を除いていく
+            slash_number = file.rfind('/')
+            number = file.rfind('.')
+            extension = None
+            if slash_number == -1:
+                extension = file
+                self.name = file[:number]
+            else:
+                extension = file[slash_number + 1:]
+                self.name = file[slash_number + 1:number]
+
+            if self.name != 'rect':
+                print(self.file_name)
+                file_path = glob.glob('Assets/')
+                a =file_path[0]+extension
+                self.img.save(a)
+                self.file_name = a
+                print(a)
+
         self.resize()
+
         
         self.item_id = canvas.create_image(self.position[0],
         self.position[1],
@@ -103,17 +130,8 @@ class MyImage():
         tags=tag)
         self.tag = tag
         
-        #名前が既に付いていたら処理しない
-        if self.name!=None:
-            return
-        #ファイルの名前を抽出していく、/と.を除いていく
-        slash_number = file.rfind('/')
-        number = file.rfind('.')
-        if slash_number == -1:
-            self.name = file[:number]
-        else:
-            self.name = file[slash_number + 1:number]
-        print(self.file_name)
+        
+        
 
 
     

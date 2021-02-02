@@ -68,10 +68,16 @@ class Application(tk.Frame):
         position_y -= constant.ADD_CANVAS_SIZE
         position_x /= constant.CANVAS_SMALLER
         position_y /= constant.CANVAS_SMALLER
+        position_x -= constant.CANVAS_WIDTH / 2
+        position_y = -position_y
+        position_y += constant.CANVAS_HEIGHT / 2
         return position_x,position_y
 
     #tkEngine座標をキャンバス座標に変換する
     def convert_tk_position_to_canvas_position(self,position_x,position_y):
+        position_x += constant.CANVAS_WIDTH / 2
+        position_y -= constant.CANVAS_HEIGHT / 2
+        position_y = -position_y
         position_x *= constant.CANVAS_SMALLER
         position_y *= constant.CANVAS_SMALLER
         position_x += constant.ADD_CANVAS_SIZE
@@ -98,8 +104,8 @@ class Application(tk.Frame):
         self.inspector_image_position_y_entry.insert(tk.END,position_y)
 
         #ピクセル数
-        width=myimg.false_width
-        height=myimg.false_height
+        width=myimg.image_size[0]
+        height=myimg.image_size[1]
         self.inspector_pixel_size_x_text.set('X : '+str(width))
         self.inspector_pixel_size_y_text.set('Y : '+str(height))
 
@@ -362,6 +368,7 @@ class Application(tk.Frame):
             return
         f = open(fn, 'rb')
         data = f.read()
+        is_success = True
         #ファイルをオープンする、withでcloseをしなくていいらしい
         with open(fn,'rb') as file:
 
@@ -375,6 +382,7 @@ class Application(tk.Frame):
             number = 0
             for image in data:
                 number+=1
+                #リストの0番目は無視する
                 if number == 1:
                     continue
                 if image == '': 
@@ -386,24 +394,28 @@ class Application(tk.Frame):
                     #インスタンス生成して
                     myimg = myimage.MyImage()
                     #名前入れて
-                    myimg.name = image[0]
+                    myimg.name = image[1]
                     #ファイルパス設定
-                    myimg.file_name = image[1]
+                    myimg.file_name = image[3]
                     #レイヤー優先度を設定して
-                    myimg.number_layer = int(image[6])
+                    myimg.number_layer = int(image[8])
                     #スケール設定して
-                    scale = [float(image[7]),float(image[8])]
+                    scale = [float(image[9]),float(image[10])]
                     myimg.set_scale(scale)
                     #座標を設定する
-                    position_x,position_y = self.convert_tk_position_to_canvas_position(float(image[2]),float(image[3]))
+                    position_x,position_y = self.convert_tk_position_to_canvas_position(float(image[4]),float(image[5]))
                     myimg.set_position_no_move(position_x,position_y)
                 except:
                     messagebox.showerror('エラー', fn + 'の読み込みに失敗しました。')
+                    is_success = False
                 try:
                     self.load_image(myimg)
                 except:
                     messagebox.showerror('エラー', image[1] + 'が読み込めませんでした、ファイルパスを確認してください。')
-            #レイヤー優先度順に画像を表示させる
+                    is_success = False
+        if is_success == True:
+            messagebox.showinfo('メッセージ', 'レベルの読み込みに成功しました！')
+        #レイヤー優先度順に画像を表示させる
         self.display_images_according_layer_priority()
 
     #レベルデータを出力する
@@ -428,13 +440,15 @@ class Application(tk.Frame):
                 #キャンバス座標をtk座標に変換する
                 x,y=self.convert_canvas_position_to_tk_position(x,y)
                 scale=myimg.scale
-                width=myimg.false_width
-                height=myimg.false_height
+                width=myimg.image_size[0]
+                height=myimg.image_size[1]
                 layer=myimg.number_layer
 
                 #画像の名前を書き出す
+                file.write(bytes((str(len(myimg.name)) + ',').encode()))
                 file.write(bytes((str(myimg.name) + ',').encode()))
                 #画像のファイルパスを書き出す
+                file.write(bytes((str(len(myimg.file_name)) + ',').encode()))
                 file.write(bytes((str(myimg.file_name) + ',').encode()))
                 #座標を書き出す
                 file.write(bytes((str(x) + ',').encode()))
@@ -725,7 +739,6 @@ class Application(tk.Frame):
         #self.canvas.place_forget()
         #self.canvas.pack(side=tk.LEFT,anchor=tk.NE)
 
-
     #キャンバスを初期化
     def init_canvas(self):
         #キャンバス作って
@@ -742,7 +755,7 @@ class Application(tk.Frame):
         self.canvas.tag_bind(constant.MYFRAME_IMAGE_TAG, '<ButtonPress-1>', self.pressed_rect)
         self.canvas.tag_bind(constant.MYFRAME_IMAGE_TAG, '<Enter>', self.enter_rect)
         self.canvas.tag_bind(constant.MYFRAME_IMAGE_TAG, '<Leave>', self.leave_rect)
-        
+
         
         #マウスの座標を表示したい
         self.canvas.bind('<Motion>', self.motion)
