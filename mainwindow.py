@@ -104,8 +104,8 @@ class Application(tk.Frame):
         self.inspector_image_position_y_entry.insert(tk.END,position_y)
 
         #ピクセル数
-        width=myimg.image_size[0]
-        height=myimg.image_size[1]
+        width=myimg.false_width
+        height=myimg.false_height
         self.inspector_pixel_size_x_text.set('X : '+str(width))
         self.inspector_pixel_size_y_text.set('Y : '+str(height))
 
@@ -553,7 +553,7 @@ class Application(tk.Frame):
         #elif (after_word.isdecimal()):
         #入力された文字が0～9の半角であれば
         elif re.match(re.compile('[0-9]+'), after_word) or re.match(re.compile('-([0-9]+)'), after_word):
-            self.apply_input_information()
+            #self.apply_input_information()
             return True
         else:
             return False
@@ -566,7 +566,7 @@ class Application(tk.Frame):
         #elif (after_word.isdecimal()):
         #入力された文字が0～9の半角であれば
         elif re.match(re.compile('[0-9]'),after_word) and ('.' in after_word) == False:
-            self.apply_input_information()
+            #self.apply_input_information()
             return True
         else:
             return False
