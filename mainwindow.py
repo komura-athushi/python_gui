@@ -327,7 +327,8 @@ class Application(tk.Frame):
         if original_myimg == None:
             #読み込むファイルの拡張子を指定
             typ = [('png画像','*.png'),
-                ('jpg画像','*.jpg')]
+                ('jpg画像','*.jpg'),
+                ('ttf画像','*.ttf')]
             #ファイル選択ダイアログを表示
             fn = filedialog.askopenfilename(filetypes=typ)
             #ファイルが選択されてなかったら処理しない
@@ -378,7 +379,7 @@ class Application(tk.Frame):
             data = data.decode()
             #\nで分割する
             data = data.split('\n')
-            self.delete_all_image()
+            self.delete_all_image(False)
             number = 0
             for image in data:
                 number+=1
@@ -420,6 +421,9 @@ class Application(tk.Frame):
 
     #レベルデータを出力する
     def export_level(self):
+        if len(self.myimage_list) == 0:
+            messagebox.showerror('エラー','画像が配置されていません。')
+            return
         #読み込むファイルの拡張子を指定
         typ = [('レベル','*'+constant.FILE_EXTENSION)]
         #ファイル選択ダイアログを表示
@@ -515,7 +519,14 @@ class Application(tk.Frame):
         self.number_image = None
 
     #全ての画像を削除する
-    def delete_all_image(self):
+    def delete_all_image(self,confirmation = True):
+        if len(self.myimage_list) == 0:
+            return
+        if confirmation == True:
+            confirmation = messagebox.askyesno('確認', '本当に画像を全て削除しますか？')
+            if confirmation == False:
+                return
+        
         for i in self.myimage_list:
             #画像をキャンバスから削除
             self.canvas.delete(self.myimage_list[i].item_id)
@@ -542,6 +553,7 @@ class Application(tk.Frame):
         #elif (after_word.isdecimal()):
         #入力された文字が0～9の半角であれば
         elif re.match(re.compile('[0-9]+'), after_word) or re.match(re.compile('-([0-9]+)'), after_word):
+            self.apply_input_information()
             return True
         else:
             return False
@@ -554,6 +566,7 @@ class Application(tk.Frame):
         #elif (after_word.isdecimal()):
         #入力された文字が0～9の半角であれば
         elif re.match(re.compile('[0-9]'),after_word) and ('.' in after_word) == False:
+            self.apply_input_information()
             return True
         else:
             return False
@@ -789,6 +802,7 @@ class Application(tk.Frame):
         self.mcom3 = tk.Menu(self.mbar,tearoff=0)
         #コマンドを追加
         self.mcom.add_command(label='画像読み込み',command=self.load_image)
+        self.mcom.add_command(label='全削除',command=self.delete_all_image)
         self.mcom.add_command(label='レベル読み込み',command=self.load_level)
         self.mcom.add_command(label='レベル書き出し',command=self.export_level)
         self.mbar.add_cascade(label='ファイル',menu=self.mcom)
