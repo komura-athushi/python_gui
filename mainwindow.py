@@ -175,6 +175,17 @@ class Application(tk.Frame):
         else:
             self.myframe.set_position(self.canvas,image_position_x,image_position_y,myimage)
 
+        #枠を削除してから
+        self.canvas.delete(self.canvas_rect)
+        #720*1280の枠を作る
+        self.canvas_rect = self.canvas.create_rectangle(
+            constant.ADD_CANVAS_SIZE,
+            constant.ADD_CANVAS_SIZE,
+            constant.CANVAS_WIDTH * constant.CANVAS_SMALLER + constant.ADD_CANVAS_SIZE,
+            constant.CANVAS_HEIGHT * constant.CANVAS_SMALLER + constant.ADD_CANVAS_SIZE,
+            outline='blue'
+        )
+
         #インスペクターウィンドウに情報を反映させる
         self.reflect_information_inspector_window()
 
@@ -262,12 +273,6 @@ class Application(tk.Frame):
             image_size=myimg.image_size
 
             scale_x,scale_y = self.myframe.calculate_scale_image(self.number_rect,myimg,delta_x,delta_y)
-
-            #リサイズ予定の大きさ
-            #*2を忘れないように
-            #width += delta_x*2
-            #height -= delta_y*2
-
             myimg.set_scale([scale_x,scale_y])
             #リサイズするために一旦消してもう一回読み込む
             self.delete_image()
@@ -779,7 +784,8 @@ class Application(tk.Frame):
             constant.ADD_CANVAS_SIZE,
             constant.ADD_CANVAS_SIZE,
             constant.CANVAS_WIDTH * constant.CANVAS_SMALLER + constant.ADD_CANVAS_SIZE,
-            constant.CANVAS_HEIGHT * constant.CANVAS_SMALLER + constant.ADD_CANVAS_SIZE
+            constant.CANVAS_HEIGHT * constant.CANVAS_SMALLER + constant.ADD_CANVAS_SIZE,
+            outline='blue'
         )
         #キャンバスの色をウィンドウの色と同じにする
         #self.canvas['bg'] = self.master['bg']

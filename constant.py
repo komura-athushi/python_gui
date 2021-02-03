@@ -21,7 +21,7 @@ MYFRAME_IMAGE_PATH = 'rect.png'
 MYFRAME_IMAGE_TAG = 'rect'
 
 #myimage関係
-MYIMAGE_MiN_SIZE = 0.03
+MYIMAGE_MiN_SIZE = 0.1
 
 
 #mainwindow関係
