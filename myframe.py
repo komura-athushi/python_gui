@@ -156,7 +156,7 @@ class MyFrame():
         
 
     def create_image(self,canvas,position_x,position_y,myimg):
-        fn = glob.glob('Assets/rect.png')
+        fn = glob.glob('Assets/sprite/rect.png')
         for i in range(constant.NUMBER_IMAGE):
             rect = myimage.MyImage()
             rect.load_image(canvas,fn[0],constant.MYFRAME_IMAGE_TAG)

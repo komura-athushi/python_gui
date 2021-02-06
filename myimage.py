@@ -115,7 +115,7 @@ class MyImage():
 
             if self.name != 'rect':
                 print(self.file_name)
-                file_path = glob.glob('Assets/')
+                file_path = glob.glob('Assets/sprite/')
                 a =file_path[0]+extension
                 self.img.save(a)
                 self.file_name = a

@@ -3,6 +3,7 @@ import tkinter.ttk as ttk
 from tkinter import filedialog
 from tkinter import messagebox
 
+
 from PIL import Image, ImageTk
 import re
 
@@ -469,10 +470,22 @@ class Application(tk.Frame):
                 file.write(bytes((str(layer) + ',').encode()))
                 #画像のスケールを書き出す
                 file.write(bytes((str(scale[0]) + ',').encode()))
-                file.write(bytes((str(scale[1]) + '').encode()))
+                file.write(bytes((str(scale[1]) + ',').encode()))
 
+                #ファイルパスを持ってきて
+                dds_file_path = myimg.file_name
+                #.の位置を調べる
+                number = dds_file_path.rfind('.')
+                #.から後を削除して
+                dds_file_path = dds_file_path[:number]
+                #.ddsを加える
+                dds_file_path+='.dds'
 
+                #.ddsの場合のファイルパスを書き出す
+                file.write(bytes((str(len(dds_file_path)) + ',').encode()))
+                file.write(bytes((str(dds_file_path) + '').encode()))
 
+        
                 file.write(bytes('\n'.encode()))
         
         messagebox.showinfo('メッセージ', '書き出しに成功しました！')
