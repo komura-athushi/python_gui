@@ -2,10 +2,31 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import filedialog
 from tkinter import messagebox
+import ctypes,sys
+
+from ctypes import c_long, WINFUNCTYPE
+from ctypes.wintypes import HWND, UINT, WPARAM, LPARAM
+
+prototype = ctypes.WINFUNCTYPE(ctypes.c_long, HWND, UINT, WPARAM, LPARAM)
+WM_DROPFILES = 0x0233
+GWL_WNDPROC = -4
+FS_ENCODING = sys.getfilesystemencoding()
+
+DragAcceptFiles = ctypes.windll.shell32.DragAcceptFiles
+DragQueryFile = ctypes.windll.shell32.DragQueryFile
+DragQueryFile.argtypes = [ ctypes.c_void_p, UINT, ctypes.c_void_p, UINT ]
+DragFinish = ctypes.windll.shell32.DragFinish
+DragFinish.argtypes = [ ctypes.c_void_p ]
+CallWindowProc = ctypes.windll.user32.CallWindowProcW
+CallWindowProc.argtypes = [ ctypes.c_void_p, HWND , UINT, WPARAM, LPARAM ]
+try: SetWindowLong = ctypes.windll.user32.SetWindowLongPtrW
+except AttributeError: SetWindowLong = ctypes.windll.user32.SetWindowLongW
 
 
 from PIL import Image, ImageTk
 import re
+
+
 
 import myimage
 import constant
@@ -14,7 +35,7 @@ import myframe
 
 
 class Application(tk.Frame):
-    
+    dnd_interval = 600
 
     def __init__(self, master=None):
         super().__init__(master)
@@ -62,6 +83,8 @@ class Application(tk.Frame):
 
         #どこの隅の画像を押したか
         self.number_rect = None
+
+        self.dnd_setup()
 
     #キャンバス座標をtkEngineの座標に変換する
     def convert_canvas_position_to_tk_position(self,position_x,position_y):
@@ -327,19 +350,24 @@ class Application(tk.Frame):
         self.master.configure(cursor=constant.DEFAULT_MOUSE_CURSOR)
 
     #ファイル読み込みが選択されたときの処理
-    def load_image(self,original_myimg=None):
+    def load_image(self,original_myimg=None,file_path=None):
         
         fn = None
-        if original_myimg == None:
+        if original_myimg == None and file_path == None:
             #読み込むファイルの拡張子を指定
             typ = [('png画像','*.png'),
                 ('jpg画像','*.jpg'),
-                ('ttf画像','*.ttf')]
+                ('ppm画像','*.ppm'),
+                ('bmp画像','*.bmp'),
+                ('tiff画像','*.tiff')
+                ]
             #ファイル選択ダイアログを表示
             fn = filedialog.askopenfilename(filetypes=typ)
             #ファイルが選択されてなかったら処理しない
             if len(fn) == 0:
                 return
+        elif original_myimg == None:
+            fn = file_path
         else:
             fn=original_myimg.file_name
         #画像読み込み
@@ -1003,9 +1031,63 @@ class Application(tk.Frame):
         command=self.delete_image)
         self.delete_button.pack(side=tk.LEFT)
 
+    def drop_check(self):
+        if self.dropnames:
+            fns = self.dropnames
+            self.dropnames = []
+            self.dnd_notify(fns)
+        self.after(self.dnd_interval, self.drop_check)
+
+    #ドラッグアンドドロップ
+    def replace_win_proc(self,hwnd, msg, wp, lp):
+        u"""D&D用のコールバック
+        ファイルのドラッグアンドドロップイベント(WM_DROPFILES)を検出して、
+        ドロップされたファイル名を保持する。
+        ここでウィンドウ(tk)を使用するとハングアップするのでデータ保存だけ行う。
+        """
+        if msg == WM_DROPFILES:
+            nf = DragQueryFile(wp, -1, None, 0)
+            buf = ctypes.c_buffer(260)
+            fns = [ buf.value.decode(FS_ENCODING) for nn in range(nf) \
+                    if DragQueryFile(wp, nn , buf, ctypes.sizeof(buf)) ]
+            DragFinish(wp)
+            self.dropnames.extend(fns)
+            print("%s dnd_notify: %s" % (self, hwnd))
+
+        return CallWindowProc(None, hwnd, msg, wp, lp)
+
+    def dnd_setup(self):
+        "Windowsのイベント処理のフックを定義する"
+        hwnd = self.winfo_id()
+        DragAcceptFiles(hwnd, True)
         
+        self.win_proc = prototype(self.replace_win_proc)
+        self.org_proc = SetWindowLong(hwnd, GWL_WNDPROC, self.win_proc)
+        SetWindowLong(hwnd, GWL_WNDPROC, self.win_proc)
+        self.after_idle(self.drop_check)
+        print("%s dnd_setup: %s,%s" % (self, hwnd, self.org_proc))
+        self.dropnames = []
+
+    def dnd_notify(self, filenames):
+        print(filenames)
+        fn= filenames[0].replace('\\', '/')
+        png_number = fn.rfind('.png')
+        jpg_number = fn.rfind('.jpg')
+        tiff_number = fn.rfind('.tiff')
+        bmp_number = fn.rfind('.bmp')
+        ppm_number = fn.rfind('.ppm')
+        if png_number == -1 and jpg_number == -1 and jpg_number == -1 and tiff_number == -1 and bmp_number == -1 and ppm_number == -1:
+            #self.message()
+            return
+
+        self.load_image(None,fn)
+        #for nn in filenames:
+            #self.tw.insert('end',"%s\n" % nn)
+
 
     
 root = tk.Tk()
+
 app = Application(master=root)
+
 app.mainloop()
